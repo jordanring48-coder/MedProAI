@@ -1,3 +1,4 @@
+import { formatTime12h } from "../utils";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import type { TimelineEntry } from "../types";
@@ -65,7 +66,7 @@ function DoseIcon({ status }: { status: string }) {
       );
     case "skipped":
       return (
-        <div className="w-9 h-9 bg-[#27272A] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center flex-shrink-0">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
             <polyline points="6 6 12 12 6 18" />
             <polyline points="14 6 18 12 14 18" />
@@ -74,7 +75,7 @@ function DoseIcon({ status }: { status: string }) {
       );
     default:
       return (
-        <div className="w-9 h-9 bg-[#151517] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center flex-shrink-0">
           <div className="w-2.5 h-2.5 bg-[#71717A] rounded-full" />
         </div>
       );
@@ -191,22 +192,22 @@ export default function TimelinePage() {
   return (
     <div className="p-5 pt-14 pb-24 min-h-screen">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-[#FAFAFA] mb-1 tracking-tight">Timeline</h1>
-        <p className="text-[15px] text-[#A1A1AA]">Doses & symptoms in one view</p>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-1 tracking-tight">Timeline</h1>
+        <p className="text-[15px] text-[var(--text-secondary)]">Doses & symptoms in one view</p>
       </div>
 
       {/* Loading */}
       {loading && (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-[#111113] rounded-3xl p-4 border border-[#27272A] animate-pulse">
-              <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
+            <div key={i} className="bg-[var(--bg-secondary)] rounded-3xl p-4 border border-[#BC25F9]/25 animate-pulse">
+              <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24 mb-4" />
               <div className="space-y-3">
                 <div className="flex gap-3">
-                  <div className="w-9 h-9 bg-[#27272A] rounded-full" />
+                  <div className="w-9 h-9 bg-[var(--bg-tertiary)] rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-[#27272A] rounded w-3/4" />
-                    <div className="h-3 bg-[#151517] rounded w-1/2" />
+                    <div className="h-4 bg-[var(--bg-tertiary)] rounded w-3/4" />
+                    <div className="h-3 bg-[var(--bg-secondary)] rounded w-1/2" />
                   </div>
                 </div>
               </div>
@@ -217,7 +218,7 @@ export default function TimelinePage() {
 
       {/* Error */}
       {!loading && error && (
-        <div className="bg-[#111113] rounded-3xl p-8 border border-[#27272A] text-center">
+        <div className="bg-[var(--bg-secondary)] rounded-3xl p-8 border border-[#BC25F9]/25 text-center">
           <div className="w-16 h-16 bg-[#F87171]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
               <circle cx="12" cy="12" r="10" />
@@ -225,8 +226,8 @@ export default function TimelinePage() {
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <p className="text-[#FAFAFA] font-medium mb-1">Something went wrong</p>
-          <p className="text-sm text-[#A1A1AA] mb-4">{error}</p>
+          <p className="text-[var(--text-primary)] font-medium mb-1">Something went wrong</p>
+          <p className="text-sm text-[var(--text-secondary)] mb-4">{error}</p>
           <button onClick={loadTimeline} className="text-[#BC25F9] font-medium hover:underline">
             Try Again
           </button>
@@ -235,7 +236,7 @@ export default function TimelinePage() {
 
       {/* Empty state */}
       {!loading && !error && !hasData && (
-        <div className="bg-[#111113] rounded-3xl p-8 border border-[#27272A] text-center">
+        <div className="bg-[var(--bg-secondary)] rounded-3xl p-8 border border-[#BC25F9]/25 text-center">
           <div className="w-16 h-16 bg-[#BC25F9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -244,8 +245,8 @@ export default function TimelinePage() {
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
           </div>
-          <h3 className="font-semibold text-[#FAFAFA] mb-1">No activity yet</h3>
-          <p className="text-sm text-[#A1A1AA] mb-4">
+          <h3 className="font-semibold text-[var(--text-primary)] mb-1">No activity yet</h3>
+          <p className="text-sm text-[var(--text-secondary)] mb-4">
             {hasMeds === null
               ? "Loading your data..."
               : hasMeds
@@ -254,7 +255,7 @@ export default function TimelinePage() {
             }
           </p>
           {hasMeds && (
-            <div className="flex flex-col gap-2 text-xs text-[#71717A]">
+            <div className="flex flex-col gap-2 text-xs text-[var(--text-secondary)]">
               <div className="flex items-center gap-2 justify-center">
                 <div className="w-2 h-2 bg-[#34D399] rounded-full" />
                 <span>Doses appear when you set a frequency on your medication</span>
@@ -279,23 +280,23 @@ export default function TimelinePage() {
             return (
               <div
                 key={group.date}
-                className="bg-[#111113] rounded-3xl border border-[#27272A] overflow-hidden transition-all duration-300"
+                className="bg-[var(--bg-secondary)] rounded-3xl border border-[#BC25F9]/25 overflow-hidden transition-all duration-300"
               >
                 {/* Date header — tappable */}
                 <button
                   onClick={() => toggleGroup(group.date)}
-                  className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[#151517]/60 transition-colors duration-200"
+                  className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[var(--bg-secondary)]/60 transition-colors duration-200"
                 >
                   <div className="flex items-center gap-3">
                     {isTodayGroup && (
                       <span className="w-2 h-2 bg-[#BC25F9] rounded-full shadow-[0_0_8px_rgba(188,37,249,0.4)]" />
                     )}
                     <h2 className={`text-sm font-semibold ${
-                      isTodayGroup ? "text-[#BC25F9]" : "text-[#A1A1AA]"
+                      isTodayGroup ? "text-[#BC25F9]" : "text-[var(--text-secondary)]"
                     }`}>
                       {group.label}
                     </h2>
-                    <span className="text-xs text-[#71717A]">
+                    <span className="text-xs text-[var(--text-secondary)]">
                       {group.entries.length} item{group.entries.length !== 1 ? "s" : ""}
                     </span>
                   </div>
@@ -307,7 +308,7 @@ export default function TimelinePage() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className={`w-4 h-4 text-[#71717A] transition-transform duration-300 ${
+                    className={`w-4 h-4 text-[var(--text-secondary)] transition-transform duration-300 ${
                       isExpanded ? "rotate-180" : ""
                     }`}
                   >
@@ -321,24 +322,24 @@ export default function TimelinePage() {
                     isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
                   }`}
                 >
-                  <div className="divide-y divide-[#27272A] border-t border-[#27272A]">
+                  <div className="divide-y divide-[var(--bg-tertiary)] border-t border-[#BC25F9]/25">
                     {group.entries.map((entry) => {
                       if (entry.type === "dose") {
                         const status = entry.status || "pending";
                         return (
-                          <div key={entry.id} className="px-5 py-3.5 flex items-center gap-3 hover:bg-[#151517]/40 transition-colors duration-150">
+                          <div key={entry.id} className="px-5 py-3.5 flex items-center gap-3 hover:bg-[var(--bg-secondary)]/40 transition-colors duration-150">
                             <DoseIcon status={status} />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-[15px] font-medium text-[#FAFAFA] truncate">
+                                <span className="text-[15px] font-medium text-[var(--text-primary)] truncate">
                                   {entry.medication_name || `Medication #${entry.medication_id}`}
                                 </span>
                                 {entry.dosage && (
-                                  <span className="text-xs text-[#71717A]">{entry.dosage}</span>
+                                  <span className="text-xs text-[var(--text-secondary)]">{entry.dosage}</span>
                                 )}
                               </div>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-sm text-[#A1A1AA]">{entry.scheduled_time}</span>
+                                <span className="text-sm text-[var(--text-secondary)]">{formatTime12h(entry.scheduled_time || "")}</span>
                                 <span className="text-[#3F3F46]">•</span>
                                 <span
                                   className={`text-xs font-medium ${
@@ -347,8 +348,8 @@ export default function TimelinePage() {
                                       : status === "missed"
                                       ? "text-[#F87171]"
                                       : status === "skipped"
-                                      ? "text-[#71717A]"
-                                      : "text-[#A1A1AA]"
+                                      ? "text-[var(--text-secondary)]"
+                                      : "text-[var(--text-secondary)]"
                                   }`}
                                 >
                                   {status === "taken"
@@ -361,7 +362,7 @@ export default function TimelinePage() {
                                 </span>
                               </div>
                               {entry.notes && (
-                                <p className="text-xs text-[#71717A] mt-1 italic">{entry.notes}</p>
+                                <p className="text-xs text-[var(--text-secondary)] mt-1 italic">{entry.notes}</p>
                               )}
                             </div>
                           </div>
@@ -374,7 +375,7 @@ export default function TimelinePage() {
                       return (
                         <div
                           key={entry.id}
-                          className="px-5 py-3.5 flex items-center gap-3 hover:bg-[#151517]/40 transition-colors duration-150"
+                          className="px-5 py-3.5 flex items-center gap-3 hover:bg-[var(--bg-secondary)]/40 transition-colors duration-150"
                           style={{
                             background:
                               sev >= 4
@@ -385,10 +386,10 @@ export default function TimelinePage() {
                           <SymptomIcon severity={sev} />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-[15px] font-medium text-[#FAFAFA]">
+                              <span className="text-[15px] font-medium text-[var(--text-primary)]">
                                 {entry.name}
                               </span>
-                              <span className="text-xs text-[#71717A]">{sevLabel}</span>
+                              <span className="text-xs text-[var(--text-secondary)]">{sevLabel}</span>
                             </div>
                             <SeverityBar severity={sev} />
                             {entry.medication_name && (
@@ -397,7 +398,7 @@ export default function TimelinePage() {
                               </p>
                             )}
                             {entry.notes && (
-                              <p className="text-xs text-[#71717A] mt-0.5 line-clamp-1">
+                              <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-1">
                                 {entry.notes}
                               </p>
                             )}

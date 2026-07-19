@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import type { Dose, Appointment } from "../types";
-import { fetchDoseHistory, fetchUpcomingAppointments, confirmDose, updateDose } from "../api";
+import { fetchDoseHistory, fetchUpcomingAppointments } from "../api";
 import usePremium from "../hooks/usePremium";
 import UserAvatar from "../components/UserAvatar";
-import DoseConfirmPopup from "../components/DoseConfirmPopup";
+import DoseEditModal from "../components/DoseEditModal";
+import { formatTime12h } from "../utils";
 
 function localDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -135,11 +136,15 @@ export default function SchedulePage() {
 
   return (
     <div className="pb-28 min-h-screen">
-      {/* Header */}
-      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-4 px-5">
-        <div className="absolute right-5 top-3">
+      {/* App wordmark top bar */}
+      <div className="flex items-center justify-center pt-0 pb-1 px-5 relative">
+        <img src="/appheader.png" alt="MedTrack AI" className="h-9 object-contain" />
+        <div className="absolute right-5 top-0">
           <UserAvatar />
         </div>
+      </div>
+      {/* Header */}
+      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-0 pb-4 px-5">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -284,9 +289,7 @@ export default function SchedulePage() {
 /* ── Dose Row ── */
 
 function DoseRow({ dose, onDoseUpdate }: { dose: Dose; onDoseUpdate: () => void }) {
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
-  const rowRef = useRef<HTMLDivElement>(null);
+  const [showEdit, setShowEdit] = useState(false);
 
   const status = dose.status;
   const isPastPending =
@@ -297,67 +300,30 @@ function DoseRow({ dose, onDoseUpdate }: { dose: Dose; onDoseUpdate: () => void 
     taken: "bg-[#BC25F9]",
     missed: "bg-[#F87171]",
     skipped: "bg-[#52525B]",
-    pending: "border-2 border-[#3F3F46]",
+    pending: "border-2 border-[var(--text-secondary)]",
   };
 
   const dotClass = dotStyle[effectiveStatus] || dotStyle.pending;
 
-  const handleRowClick = (e: React.MouseEvent) => {
-    if (effectiveStatus !== "pending") return;
-    // Only show popup for pending doses
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    // Position popup relative to the viewport, then we'll use fixed positioning
-    setPopupPosition({
-      top: rect.bottom + 4,
-      left: Math.max(8, rect.left - 20),
-    });
-    setShowPopup(true);
-  };
-
-  const handleConfirm = async () => {
-    setShowPopup(false);
-    try {
-      await confirmDose(dose.id);
-    } catch {
-      // Fallback to simple update
-      await updateDose(dose.id, "taken");
-    }
-    onDoseUpdate();
-  };
-
-  const handleSkip = async () => {
-    setShowPopup(false);
-    try {
-      await updateDose(dose.id, "skipped");
-    } catch {
-      // silently fail
-    }
-    onDoseUpdate();
-  };
-
-  const handleCancel = () => {
-    setShowPopup(false);
-  };
-
   return (
-    <div ref={rowRef} className="relative">
+    <>
       <div
-        className={`px-5 py-3.5 flex items-center gap-3 ${effectiveStatus === "pending" ? "cursor-pointer active:bg-[#151517]/60" : ""}`}
-        onClick={handleRowClick}
+        className="px-5 py-3.5 flex items-center gap-3 cursor-pointer active:bg-[#151517]/60"
+        onClick={() => setShowEdit(true)}
       >
         {/* Status dot */}
         <div className={`w-3 h-3 rounded-full flex-shrink-0 ${dotClass}`} />
 
         {/* Time */}
         <span className="text-sm font-medium text-[var(--text-primary)] w-14 flex-shrink-0 tabular-nums">
-          {dose.scheduled_time}
+          {formatTime12h(dose.scheduled_time)}
         </span>
 
         {/* Pill icon */}
         <svg
           viewBox="0 0 24 24"
           fill="none"
-          stroke={effectiveStatus === "taken" ? "#BC25F9" : effectiveStatus === "missed" ? "#F87171" : effectiveStatus === "skipped" ? "#52525B" : "#A1A1AA"}
+          stroke={effectiveStatus === "taken" ? "#BC25F9" : effectiveStatus === "missed" ? "#F87171" : effectiveStatus === "skipped" ? "#52525B" : "var(--text-secondary)"}
           strokeWidth="2"
           className="w-4 h-4 flex-shrink-0"
           strokeLinecap="round"
@@ -373,17 +339,14 @@ function DoseRow({ dose, onDoseUpdate }: { dose: Dose; onDoseUpdate: () => void 
         </span>
       </div>
 
-      {/* Inline popup */}
-      {showPopup && (
-        <DoseConfirmPopup
+      {showEdit && (
+        <DoseEditModal
           dose={dose}
-          onConfirm={handleConfirm}
-          onSkip={handleSkip}
-          onCancel={handleCancel}
-          position={popupPosition}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => { setShowEdit(false); onDoseUpdate(); }}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -405,7 +368,7 @@ function AppointmentRow({
 
       {/* Time */}
       <span className="text-sm font-medium text-[var(--text-primary)] w-14 flex-shrink-0 tabular-nums">
-        {appointment.time || "--:--"}
+        {formatTime12h(appointment.time)}
       </span>
 
       {/* Calendar icon */}

@@ -63,22 +63,42 @@ router.get("/medications/:id/doses", (req: Request, res: Response) => {
   res.json(doses);
 });
 
+// POST /api/doses/midnight-mark — mark all pending doses for a date as missed
+router.post("/doses/midnight-mark", (req: Request, res: Response) => {
+  const userId = getUserId(req);
+  const { date } = req.body;
+
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    res.status(400).json({ error: "Valid date required (YYYY-MM-DD)" });
+    return;
+  }
+
+  const result = db.prepare(
+    `UPDATE doses SET status = 'missed'
+     WHERE scheduled_date = ? AND user_id = ?
+     AND status = 'pending'`
+  ).run(date, userId);
+
+  res.json({ marked: result.changes });
+});
+
 // GET /api/doses/today
 router.get("/doses/today", (req: Request, res: Response) => {
   const userId = getUserId(req);
   const dateParam = (req.query.date as string);
+  const tzOffset = parseInt(req.query.tzOffset as string) || 0; // minutes, positive = behind UTC
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   const today = (dateParam && dateRegex.test(dateParam))
     ? dateParam
-    : new Date().toISOString().slice(0, 10);
+    : new Date(Date.now() - tzOffset * 60000).toISOString().slice(0, 10);
 
   // Determine if we're fetching today's date (the actual current date)
-  const actualToday = new Date().toISOString().slice(0, 10);
+  const actualToday = new Date(Date.now() - tzOffset * 60000).toISOString().slice(0, 10);
   const isToday = today === actualToday;
 
   // Midnight auto-missed: flip past-due pending doses to "missed" for today's date
   if (isToday) {
-    const nowTime = new Date();
+    const nowTime = new Date(Date.now() - tzOffset * 60000);
     const currentTimeStr = `${String(nowTime.getHours()).padStart(2, '0')}:${String(nowTime.getMinutes()).padStart(2, '0')}`;
 
     db.prepare(

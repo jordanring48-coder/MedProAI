@@ -1,3 +1,4 @@
+import { formatTime12h } from "../utils";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Medication, Dose, Symptom, SymptomPattern, TimelineEntry } from "../types";
@@ -247,11 +248,15 @@ export default function MedsPage() {
 
   return (
     <div className="pb-24 min-h-screen">
-      {/* Header */}
-      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-4 px-5">
-        <div className="absolute right-5 top-3">
+      {/* App wordmark top bar */}
+      <div className="flex items-center justify-center pt-0 pb-1 px-5 relative">
+        <img src="/appheader.png" alt="MedTrack AI" className="h-9 object-contain" />
+        <div className="absolute right-5 top-0">
           <UserAvatar />
         </div>
+      </div>
+      {/* Header */}
+      <div className="relative pb-4 px-5">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -309,7 +314,7 @@ export default function MedsPage() {
               return (
                 <div
                   key={s.id}
-                  className="bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[#3F3F46] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
+                  className="bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[var(--text-secondary)] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
                 >
                   <div className="flex items-center gap-4">
                     <div
@@ -501,7 +506,7 @@ export default function MedsPage() {
                             </div>
                           ) : (
                             <div className="w-9 h-9 bg-[#27272A] rounded-full flex items-center justify-center flex-shrink-0">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                                 <polyline points="6 6 12 12 6 18" />
                                 <polyline points="14 6 18 12 14 18" />
                               </svg>
@@ -517,7 +522,7 @@ export default function MedsPage() {
                               )}
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-sm text-[var(--text-secondary)]">{entry.scheduled_time}</span>
+                              <span className="text-sm text-[var(--text-secondary)]">{formatTime12h(entry.scheduled_time)}</span>
                               <span className="text-[var(--text-secondary)]">•</span>
                               <span
                                 className={`text-xs font-medium ${
@@ -650,12 +655,12 @@ export default function MedsPage() {
                   {hasPending ? (
                     <button
                       onClick={() => medId && handleMarkAllTaken(medId, doses)}
-                      className="w-7 h-7 rounded-full border-2 border-[#3F3F46] bg-transparent hover:border-[#BC25F9] active:scale-90 transition-all duration-150 cursor-pointer flex-shrink-0"
+                      className="w-11 h-11 rounded-full border-2 border-[var(--text-secondary)] bg-transparent hover:border-[#BC25F9] active:scale-90 transition-all duration-150 cursor-pointer flex-shrink-0 flex items-center justify-center"
                       aria-label={`Mark all ${medName} as taken`}
                     />
                   ) : allTaken ? (
-                    <div className={`w-7 h-7 rounded-full bg-[#BC25F9] flex items-center justify-center flex-shrink-0 ${isFlashing ? 'shadow-[0_0_12px_rgba(188,37,249,0.5)] ring-2 ring-[#BC25F9]/30 animate-[checkPop_0.3s_ease-out]' : ''}`}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                    <div className={`w-11 h-11 rounded-full bg-[#BC25F9] flex items-center justify-center flex-shrink-0 ${isFlashing ? 'shadow-[0_0_12px_rgba(188,37,249,0.5)] ring-2 ring-[#BC25F9]/30 animate-[checkPop_0.3s_ease-out]' : ''}`}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
@@ -757,7 +762,7 @@ export default function MedsPage() {
               <button
                 key={med.id}
                 onClick={() => navigate(`/medications/${med.id}`)}
-                className={`w-full text-left bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[#3F3F46] active:scale-[0.99] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] ${
+                className={`w-full text-left bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[var(--text-secondary)] active:scale-[0.99] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] ${
                   med.refill_date ? `border-l-2 ${colors.border}` : ""
                 }`}
               >
@@ -955,7 +960,7 @@ function DosePill({
             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
           </svg>
         ) : null}
-        {dose.scheduled_time}
+        {formatTime12h(dose.scheduled_time)}
       </button>
 
       {showPopup && (
