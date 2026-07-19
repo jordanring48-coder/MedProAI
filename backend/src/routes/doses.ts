@@ -63,31 +63,32 @@ router.get("/medications/:id/doses", (req: Request, res: Response) => {
   res.json(doses);
 });
 
+// POST /api/doses/midnight-mark — mark all pending doses for a date as missed
+router.post("/doses/midnight-mark", (req: Request, res: Response) => {
+  const userId = getUserId(req);
+  const { date } = req.body;
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res.status(400).json({ error: "Valid date required (YYYY-MM-DD)" });
+  }
+
+  const result = db.prepare(
+    `UPDATE doses SET status = 'missed'
+     WHERE scheduled_date = ? AND user_id = ?
+     AND status = 'pending'`
+  ).run(date, userId);
+
+  res.json({ marked: result.changes });
+});
+
 // GET /api/doses/today
 router.get("/doses/today", (req: Request, res: Response) => {
   const userId = getUserId(req);
   const dateParam = (req.query.date as string);
+  const tzOffset = parseInt(req.query.tzOffset as string) || 0; // minutes, positive = behind UTC
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   const today = (dateParam && dateRegex.test(dateParam))
     ? dateParam
-    : new Date().toISOString().slice(0, 10);
-
-  // Determine if we're fetching today's date (the actual current date)
-  const actualToday = new Date().toISOString().slice(0, 10);
-  const isToday = today === actualToday;
-
-  // Midnight auto-missed: flip past-due pending doses to "missed" for today's date
-  if (isToday) {
-    const nowTime = new Date();
-    const currentTimeStr = `${String(nowTime.getHours()).padStart(2, '0')}:${String(nowTime.getMinutes()).padStart(2, '0')}`;
-
-    db.prepare(
-      `UPDATE doses SET status = 'missed'
-       WHERE scheduled_date = ? AND user_id = ?
-       AND status = 'pending'
-       AND scheduled_time < ?`
-    ).run(today, userId, currentTimeStr);
-  }
+    : new Date(Date.now() - tzOffset * 60000).toISOString().slice(0, 10);
 
   const doses = db
     .prepare(
@@ -208,7 +209,7 @@ router.put("/doses/:id", (req: Request, res: Response) => {
     return;
   }
 
-  const { status, notes } = req.body;
+  const { status, notes, taken_at } = req.body;
   const validStatuses = ["pending", "taken", "missed", "skipped"];
 
   if (status && !validStatuses.includes(status)) {
@@ -218,11 +219,24 @@ router.put("/doses/:id", (req: Request, res: Response) => {
 
   const newStatus = status || dose.status;
   const newNotes = notes !== undefined ? String(notes) : dose.notes;
-  const takenAt = newStatus === "taken" ? new Date().toISOString() : dose.taken_at;
+
+  // Determine taken_at:
+  // - If explicitly provided in body (from edit modal), use it
+  // - If status changed to "taken" without explicit time, auto-generate HH:MM
+  // - Otherwise keep existing value
+  let newTakenAt: string | null = dose.taken_at;
+  if (taken_at !== undefined) {
+    // Explicit: use provided value (null clears it; string sets it)
+    newTakenAt = taken_at || null;
+  } else if (newStatus === "taken" && dose.status !== "taken") {
+    // Auto-generate current time in HH:MM
+    const now = new Date();
+    newTakenAt = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
 
   db.prepare(
     `UPDATE doses SET status = ?, notes = ?, taken_at = ? WHERE id = ? AND user_id = ?`
-  ).run(newStatus, newNotes, takenAt, doseId, userId);
+  ).run(newStatus, newNotes, newTakenAt, doseId, userId);
 
   const updated = db.prepare(
     `SELECT d.*, m.name as medication_name, m.dosage as medication_dosage, m.frequency as medication_frequency
@@ -249,13 +263,14 @@ router.post("/doses/:id/confirm", (req: Request, res: Response) => {
   }
 
   const affectedIds: number[] = [];
-  const now = new Date().toISOString();
+  const now = new Date();
+  const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
   const doConfirm = db.transaction(() => {
     // 1. Mark the tapped dose as taken
     db.prepare(
       `UPDATE doses SET status = 'taken', taken_at = ? WHERE id = ? AND user_id = ?`
-    ).run(now, doseId, userId);
+    ).run(nowTime, doseId, userId);
     affectedIds.push(doseId);
 
     // 2. Cascade: find earlier pending doses of the SAME medication on the SAME day

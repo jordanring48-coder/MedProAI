@@ -108,9 +108,20 @@ export async function deleteMedication(id: number | string): Promise<void> {
 // ── Doses API ──
 
 export async function fetchTodayDoses(date?: string): Promise<Dose[]> {
-  const url = date ? `/api/doses/today?date=${encodeURIComponent(date)}` : "/api/doses/today";
+  const tzOffset = new Date().getTimezoneOffset();
+  let url = `/api/doses/today?tzOffset=${tzOffset}`;
+  if (date) url += `&date=${encodeURIComponent(date)}`;
   const res = await authFetch(url);
   return handleResponse<Dose[]>(res);
+}
+
+export async function markMidnightMissed(date: string): Promise<{ marked: number }> {
+  const res = await authFetch("/api/doses/midnight-mark", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date }),
+  });
+  return handleResponse<{ marked: number }>(res);
 }
 
 export async function fetchMedicationDoses(
@@ -148,12 +159,16 @@ export async function scheduleDoses(
 export async function updateDose(
   doseId: number,
   status: string,
+  takenAt?: string,
   notes?: string
 ): Promise<Dose> {
+  const body: Record<string, any> = { status };
+  if (notes !== undefined) body.notes = notes;
+  if (takenAt !== undefined) body.taken_at = takenAt;
   const res = await authFetch(`/api/doses/${doseId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status, notes }),
+    body: JSON.stringify(body),
   });
   return handleResponse<Dose>(res);
 }
