@@ -68,14 +68,14 @@ export default function BottomNav() {
               to={tab.to}
               className={`relative flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-xl transition-all duration-200 active:scale-[0.92] ${
                 isActive
-                  ? "text-[#2DE2A0]"
+                  ? "text-[#BC25F9] ring-2 ring-[#BC25F9]/30"
                   : "text-[#71717A] hover:text-[#A1A1AA]"
               }`}
             >
               {tab.icon(isActive)}
               <span className="text-[10px] font-semibold tracking-tight">{tab.label}</span>
               {isActive && (
-                <span className="absolute -bottom-0.5 w-1.5 h-1.5 bg-[#2DE2A0] rounded-full shadow-[0_0_10px_rgba(45,226,160,0.6)]" />
+                <span className="absolute -bottom-0.5 w-1.5 h-1.5 bg-[#BC25F9] rounded-full shadow-[0_0_10px_rgba(188,37,249,0.6)]" />
               )}
             </NavLink>
           );

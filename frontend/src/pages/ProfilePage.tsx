@@ -12,8 +12,9 @@ import {
 import { useAuth } from "../AuthContext";
 import usePremium from "../hooks/usePremium";
 import AppointmentModal from "../components/AppointmentModal";
+import UserAvatar from "../components/UserAvatar";
 
-const AVATAR_COLORS = ["#2DE2A0", "#14B8A6", "#0EA5E9", "#8B5CF6", "#F43F5E", "#F59E0B"];
+const AVATAR_COLORS = ["#BC25F9", "#14B8A6", "#0EA5E9", "#8B5CF6", "#F43F5E", "#F59E0B"];
 
 const refillColors = {
   green: { dot: "bg-[#34D399]", bg: "bg-[#34D399]/10", text: "text-[#34D399]" },
@@ -129,24 +130,29 @@ export default function ProfilePage() {
   const upcomingRefills = refills.filter((m) => getRefillStatus(m.refill_date) === "orange");
 
   return (
-    <div className="p-5 pt-14 pb-24 min-h-screen bg-[#0A0A0B]">
-      <div className="mb-6">
+    <div className="pb-24 min-h-screen bg-[#0A0A0B]">
+      {/* Header */}
+      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-4 px-5">
+        <div className="absolute right-5 top-3">
+          <UserAvatar />
+        </div>
         <h1 className="text-3xl font-bold text-[#FAFAFA] mb-1">Profile</h1>
         <p className="text-[15px] text-[#A1A1AA]">Your health stats & settings</p>
       </div>
 
+      <div className="px-5">
       {/* Avatar Color */}
-      <div className="bg-[#161618] rounded-2xl border border-[#27272A] p-5 mb-4">
+      <div className="bg-[#111113] rounded-2xl border border-[#27272A] p-5 mb-4">
         <p className="text-sm font-semibold text-[#FAFAFA] mb-3">Avatar Color</p>
         <div className="flex gap-3">
           {AVATAR_COLORS.map((color) => {
-            const isSelected = (user?.avatarColor || "#2DE2A0") === color;
+            const isSelected = (user?.avatarColor || "#BC25F9") === color;
             return (
               <button
                 key={color}
                 onClick={() => handleAvatarColor(color)}
                 className={`w-8 h-8 rounded-full transition-all duration-200 active:scale-95 ${
-                  isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-[#161618]" : ""
+                  isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-[#111113]" : ""
                 }`}
                 style={{ backgroundColor: color }}
                 aria-label={`Avatar color ${color}`}
@@ -158,7 +164,7 @@ export default function ProfilePage() {
 
       {/* User info + Logout */}
       {user && (
-        <div className="bg-[#161618] rounded-2xl shadow-sm border border-[#27272A] p-4 mb-4 flex items-center justify-between">
+        <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-4 mb-4 flex items-center justify-between">
           <div>
             <p className="text-[15px] font-semibold text-[#FAFAFA]">
               {user.name || user.email}
@@ -177,7 +183,7 @@ export default function ProfilePage() {
       {/* Loading */}
       {loading && (
         <div className="space-y-4">
-          <div className="bg-[#161618] rounded-2xl p-6 shadow-sm animate-pulse">
+          <div className="bg-[#111113] rounded-2xl p-6 shadow-sm animate-pulse">
             <div className="h-4 bg-[#27272A] rounded w-32 mb-4" />
             <div className="flex gap-6 justify-center">
               <div className="w-20 h-20 bg-[#27272A] rounded-full" />
@@ -189,9 +195,9 @@ export default function ProfilePage() {
 
       {/* Error */}
       {!loading && error && (
-        <div className="bg-[#161618] rounded-2xl p-8 shadow-sm text-center">
+        <div className="bg-[#111113] rounded-2xl p-8 shadow-sm text-center">
           <p className="text-[#F87171] font-medium mb-4">{error}</p>
-          <button onClick={loadAll} className="text-[#2DE2A0] font-medium hover:underline">
+          <button onClick={loadAll} className="text-[#BC25F9] font-medium hover:underline">
             Try Again
           </button>
         </div>
@@ -200,12 +206,12 @@ export default function ProfilePage() {
       {!loading && !error && stats7 && stats30 && (
         <>
           {/* ── Premium Status Card ── */}
-          <div className={`rounded-2xl border p-6 mb-4 ${isPremium ? "bg-gradient-to-br from-[#FBBF24]/10 to-[#FBBF24]/5 border-[#FBBF24]/30" : "bg-[#161618] border-[#27272A]"}`}>
+          <div className={`rounded-2xl border p-6 mb-4 ${isPremium ? "bg-gradient-to-br from-[#FBBF24]/10 to-[#FBBF24]/5 border-[#FBBF24]/30" : "bg-[#111113] border-[#27272A]"}`}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-semibold text-[#FAFAFA]">
-                    {isPremium ? "MedTrack AI Premium" : "MedTrack AI Free"}
+                    {isPremium ? "Luna Premium" : "Luna Free"}
                   </h3>
                   {isPremium && (
                     <span className="inline-flex items-center gap-1 bg-[#FBBF24] px-2 py-0.5 rounded-full text-[11px] font-bold text-black">
@@ -239,9 +245,9 @@ export default function ProfilePage() {
 
           {/* ── Refill Summary (premium) ── */}
           {isPremium && refills.length > 0 && (
-            <div className="bg-[#161618] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
+            <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
               <div className="flex items-center gap-2 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2DE2A0" className="w-5 h-5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#BC25F9" className="w-5 h-5">
                   <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
                 </svg>
                 <h2 className="text-[17px] font-semibold text-[#FAFAFA]">Refill Summary</h2>
@@ -295,7 +301,7 @@ export default function ProfilePage() {
 
           {/* ── Appointments Section (premium) ── */}
           {isPremium && (
-            <div className="bg-[#161618] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
+            <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#34D399" className="w-5 h-5">
@@ -305,7 +311,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
-                  className="text-[#2DE2A0] font-medium text-sm hover:underline"
+                  className="text-[#BC25F9] font-medium text-sm hover:underline"
                 >
                   + Add
                 </button>
@@ -341,7 +347,7 @@ export default function ProfilePage() {
                       <div className="flex gap-1 flex-shrink-0">
                         <button
                           onClick={() => { setEditingAppointment(a); setShowAppointmentModal(true); }}
-                          className="text-[#71717A] hover:text-[#2DE2A0] p-1"
+                          className="text-[#71717A] hover:text-[#BC25F9] p-1"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
@@ -364,7 +370,7 @@ export default function ProfilePage() {
           )}
 
           {/* Adherence rings */}
-          <div className="bg-[#161618] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
+          <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
             <h2 className="text-[17px] font-semibold text-[#FAFAFA] mb-5 text-center">
               Adherence Rate
             </h2>
@@ -387,12 +393,12 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats summary */}
-          <div className="bg-[#161618] rounded-2xl shadow-sm border border-[#27272A] overflow-hidden mb-4">
+          <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] overflow-hidden mb-4">
             <div className="divide-y divide-[#27272A]">
               <div className="px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#2DE2A0]/10 rounded-lg flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2DE2A0" className="w-4 h-4">
+                  <div className="w-8 h-8 bg-[#BC25F9]/10 rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#BC25F9" className="w-4 h-4">
                       <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
                     </svg>
                   </div>
@@ -452,6 +458,8 @@ export default function ProfilePage() {
         </>
       )}
 
+      </div>
+
       {/* Appointment Modal */}
       {showAppointmentModal && (
         <AppointmentModal
@@ -461,7 +469,7 @@ export default function ProfilePage() {
         />
       )}
 
-      <p className="text-center text-xs text-[#71717A] mt-8">MedTrack AI v0.3.0</p>
+      <p className="text-center text-xs text-[#71717A] mt-8">Luna v0.3.0</p>
     </div>
   );
 }

@@ -102,7 +102,7 @@ function getDefaultTimes(count: number): string[] {
 
 // Shared dark-theme select styles (reused across frequency & dosage selects)
 const selectClasses =
-  "w-full px-4 py-3 bg-[#1C1C1F] rounded-xl text-[17px] text-[#FAFAFA] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow appearance-none cursor-pointer";
+  "w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow appearance-none cursor-pointer";
 
 const selectErrorClasses = "ring-2 ring-[#F87171]";
 
@@ -517,12 +517,12 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
       onClick={handleOverlayClick}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in"
     >
-      <div className="bg-[#161618] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-xl animate-slide-up border border-[#27272A]">
+      <div className="bg-[#111113] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-xl animate-slide-up border border-[#27272A]">
         {/* Header */}
-        <div className="sticky top-0 bg-[#161618] rounded-t-3xl px-6 pt-6 pb-4 border-b border-[#27272A] flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-[#111113] rounded-t-3xl px-6 pt-6 pb-4 border-b border-[#27272A] flex items-center justify-between z-10">
           <button
             onClick={onClose}
-            className="text-[#2DE2A0] font-medium text-[17px] hover:opacity-80"
+            className="text-[#BC25F9] font-medium text-[17px] hover:opacity-80"
           >
             Cancel
           </button>
@@ -549,7 +549,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               onFocus={handleNameFocus}
               placeholder="e.g. Lisinopril"
               autoComplete="off"
-              className={`w-full px-4 py-3 bg-[#1C1C1F] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow ${
+              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow ${
                 showSuggestions && suggestions.length > 0 ? "rounded-b-none" : ""
               } ${getError("name") ? "ring-2 ring-[#F87171]" : ""}`}
               autoFocus
@@ -557,7 +557,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
             {/* Autocomplete dropdown */}
             {showSuggestions && (
-              <div className="absolute left-0 right-0 top-full z-20 bg-[#1C1C1F] border border-[#27272A] rounded-b-xl shadow-2xl max-h-56 overflow-y-auto">
+              <div className="absolute left-0 right-0 top-full z-20 bg-[#151517] border border-[#27272A] rounded-b-xl shadow-2xl max-h-56 overflow-y-auto">
                 {searching && suggestions.length === 0 && (
                   <div className="px-4 py-3 text-sm text-[#71717A] flex items-center gap-2">
                     <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -588,8 +588,8 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                     onMouseEnter={() => setHighlightedIndex(idx)}
                     className={`w-full text-left px-4 py-3 flex items-center justify-between transition-colors ${
                       idx === highlightedIndex
-                        ? "bg-[#2DE2A0]/10"
-                        : "hover:bg-[#2DE2A0]/5"
+                        ? "bg-[#BC25F9]/10"
+                        : "hover:bg-[#BC25F9]/5"
                     }`}
                   >
                     <span className="text-[15px] text-[#FAFAFA] font-medium truncate mr-2">
@@ -605,7 +605,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
             {/* Drug info banner — shown after selecting a suggestion */}
             {drugInfo && (
-              <div className="mt-2 bg-[#2DE2A0]/5 border border-[#2DE2A0]/20 rounded-xl p-3 relative">
+              <div className="mt-2 bg-[#BC25F9]/5 border border-[#BC25F9]/20 rounded-xl p-3 relative">
                 <button
                   type="button"
                   onClick={dismissDrugInfo}
@@ -659,7 +659,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
             {/* Strength picker — shown when drug has multiple strengths */}
             {showStrengthPicker && strengthOptions.length > 0 && (
-              <div className="mt-2 bg-[#1C1C1F] rounded-xl p-3 border border-[#27272A]">
+              <div className="mt-2 bg-[#151517] rounded-xl p-3 border border-[#27272A]">
                 <p className="text-[#71717A] text-xs font-semibold uppercase tracking-wider mb-2">
                   Select strength
                 </p>
@@ -669,10 +669,10 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                       key={s.rxcui}
                       type="button"
                       onClick={() => selectStrength(s)}
-                      className="w-full text-left px-3 py-2.5 flex items-center gap-3 rounded-lg hover:bg-[#2DE2A0]/5 transition-colors group"
+                      className="w-full text-left px-3 py-2.5 flex items-center gap-3 rounded-lg hover:bg-[#BC25F9]/5 transition-colors group"
                     >
-                      <span className="w-4 h-4 rounded-full border-2 border-[#3F3F46] flex items-center justify-center shrink-0 group-hover:border-[#2DE2A0]">
-                        <span className="w-2 h-2 rounded-full bg-[#2DE2A0] opacity-0 group-hover:opacity-100" />
+                      <span className="w-4 h-4 rounded-full border-2 border-[#3F3F46] flex items-center justify-center shrink-0 group-hover:border-[#BC25F9]">
+                        <span className="w-2 h-2 rounded-full bg-[#BC25F9] opacity-0 group-hover:opacity-100" />
                       </span>
                       <span className="text-sm text-[#D4D4D8] group-hover:text-[#FAFAFA] leading-tight">
                         {s.name}
@@ -748,7 +748,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                   setField("dosage", e.target.value);
                 }}
                 placeholder="Enter custom dosage..."
-                className="mt-2 w-full px-4 py-3 bg-[#1C1C1F] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow"
+                className="mt-2 w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow"
               />
             )}
             {getError("dosage") && (
@@ -774,7 +774,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                   }
                 }}
                 style={{ colorScheme: "dark" }}
-                className={`bg-[#1C1C1F] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#2DE2A0]/40 transition-shadow appearance-none cursor-pointer w-full ${
+                className={`bg-[#151517] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/40 transition-shadow appearance-none cursor-pointer w-full ${
                   getError("quantity") ? "ring-2 ring-[#F87171]" : ""
                 }`}
               >
@@ -803,7 +803,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                   setField("quantity", e.target.value);
                 }}
                 placeholder="Enter custom quantity..."
-                className="mt-2 w-full px-4 py-3 bg-[#1C1C1F] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow"
+                className="mt-2 w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow"
               />
             )}
             {getError("quantity") && (
@@ -867,7 +867,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                           return next;
                         });
                       }}
-                      className="w-[120px] px-3 py-2 bg-[#1C1C1F] rounded-xl text-[15px] text-[#FAFAFA] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow color-scheme-dark border border-[#27272A]"
+                      className="w-[120px] px-3 py-2 bg-[#151517] rounded-xl text-[15px] text-[#FAFAFA] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow color-scheme-dark border border-[#27272A]"
                     />
                     {reminderTimes.length > 1 && (
                       <span className="text-xs text-[#71717A] min-w-[28px]">
@@ -893,7 +893,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               value={form.prescribing_doctor}
               onChange={(e) => setField("prescribing_doctor", e.target.value)}
               placeholder="e.g. Dr. Smith"
-              className={`w-full px-4 py-3 bg-[#1C1C1F] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow ${
+              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow ${
                 getError("prescribing_doctor") ? "ring-2 ring-[#F87171]" : ""
               }`}
             />
@@ -911,7 +911,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               type="date"
               value={form.refill_date}
               onChange={(e) => setField("refill_date", e.target.value)}
-              className={`w-full px-4 py-3 bg-[#1C1C1F] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow color-scheme-dark ${
+              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow color-scheme-dark ${
                 getError("refill_date") ? "ring-2 ring-[#F87171]" : ""
               }`}
             />
@@ -930,7 +930,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               onChange={(e) => setField("instructions", e.target.value)}
               placeholder="e.g. Take with food, avoid alcohol..."
               rows={3}
-              className={`w-full px-4 py-3 bg-[#1C1C1F] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#2DE2A0] transition-shadow resize-none ${
+              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow resize-none ${
                 getError("instructions") ? "ring-2 ring-[#F87171]" : ""
               }`}
             />
@@ -943,7 +943,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-[#2DE2A0] text-white font-semibold text-[17px] py-3.5 rounded-2xl shadow-sm hover:bg-[#24B882] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-[#BC25F9] text-white font-semibold text-[17px] py-3.5 rounded-2xl shadow-sm shadow-[0_0_16px_rgba(188,37,249,0.35)] hover:bg-[#A020F0] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : isEdit ? "Save Changes" : "Add Medication"}
           </button>
@@ -960,7 +960,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                     <button
                       type="button"
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 bg-[#1C1C1F] text-[#A1A1AA] font-medium py-2.5 rounded-xl border border-[#27272A] hover:bg-[#27272A] transition-colors"
+                      className="flex-1 bg-[#151517] text-[#A1A1AA] font-medium py-2.5 rounded-xl border border-[#27272A] hover:bg-[#27272A] transition-colors"
                     >
                       Cancel
                     </button>
@@ -1007,7 +1007,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
         /* Dark theme select option styling */
         select option {
-          background: #1C1C1F;
+          background: #151517;
           color: #FAFAFA;
         }
       `}</style>

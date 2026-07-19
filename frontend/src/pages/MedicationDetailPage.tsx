@@ -90,11 +90,11 @@ export default function MedicationDetailPage() {
   if (error && !med) {
     return (
       <div className="p-6 pt-12 text-center">
-        <div className="bg-[#161618] rounded-2xl p-8 border border-[#27272A]">
+        <div className="bg-[#111113] rounded-2xl p-8 border border-[#27272A]">
           <p className="text-[#F87171] font-medium mb-4">{error}</p>
           <button
             onClick={() => navigate("/")}
-            className="text-[#2DE2A0] font-medium hover:underline"
+            className="text-[#BC25F9] font-medium hover:underline"
           >
             Back to Medications
           </button>
@@ -113,7 +113,7 @@ export default function MedicationDetailPage() {
       {/* Back button */}
       <button
         onClick={() => navigate("/")}
-        className="flex items-center gap-1.5 text-[#2DE2A0] font-medium text-[17px] mb-6 hover:opacity-80 transition-opacity duration-200"
+        className="flex items-center gap-1.5 text-[#BC25F9] font-medium text-[17px] mb-6 hover:opacity-80 transition-opacity duration-200"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
           <path d="M15 18l-6-6 6-6" />
@@ -122,10 +122,10 @@ export default function MedicationDetailPage() {
       </button>
 
       {/* Header card */}
-      <div className="bg-[#161618] rounded-2xl p-6 border border-[#27272A] mb-4">
+      <div className="bg-[#111113] rounded-2xl p-6 border border-[#27272A] mb-4">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 bg-[#2DE2A0]/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+          <div className="w-14 h-14 bg-[#BC25F9]/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
               <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
             </svg>
           </div>
@@ -161,7 +161,7 @@ export default function MedicationDetailPage() {
       )}
 
       {/* Details card */}
-      <div className="bg-[#161618] rounded-2xl border border-[#27272A] overflow-hidden mb-4">
+      <div className="bg-[#111113] rounded-2xl border border-[#27272A] overflow-hidden mb-4">
         <div className="divide-y divide-[#27272A]">
           {med.prescribing_doctor && (
             <div className="px-6 py-4 flex justify-between items-start">
@@ -198,21 +198,21 @@ export default function MedicationDetailPage() {
 
       {/* Instructions */}
       {med.instructions && (
-        <div className="bg-[#161618] rounded-2xl border border-[#27272A] p-6 mb-4">
+        <div className="bg-[#111113] rounded-2xl border border-[#27272A] p-6 mb-4">
           <h3 className="text-sm font-medium text-[#A1A1AA] mb-2 uppercase tracking-wide">Instructions</h3>
           <p className="text-[15px] text-[#FAFAFA] leading-relaxed">{med.instructions}</p>
         </div>
       )}
 
       {/* Drug Info — FDA data */}
-      <div className="bg-[#161618] rounded-2xl border border-[#27272A] overflow-hidden mb-4">
+      <div className="bg-[#111113] rounded-2xl border border-[#27272A] overflow-hidden mb-4">
         <button
           onClick={() => setShowDrugInfo(!showDrugInfo)}
-          className="w-full px-6 py-4 flex items-center justify-between hover:bg-[#1C1C1F] transition-colors duration-200"
+          className="w-full px-6 py-4 flex items-center justify-between hover:bg-[#151517] transition-colors duration-200"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#22D3EE]/10 rounded-lg flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <div className="w-8 h-8 bg-[#BC25F9]/10 rounded-lg flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
                 <line x1="16" y1="13" x2="8" y2="13" />
@@ -223,9 +223,9 @@ export default function MedicationDetailPage() {
             <div className="text-left">
               <span className="text-[15px] font-medium text-[#FAFAFA]">Drug Information</span>
               {drugInfo && (
-                <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-[#22D3EE]/10 rounded-full">
-                  <span className="w-1.5 h-1.5 bg-[#22D3EE] rounded-full" />
-                  <span className="text-[10px] font-medium text-[#22D3EE] uppercase tracking-wide">Powered by FDA</span>
+                <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-[#BC25F9]/10 rounded-full">
+                  <span className="w-1.5 h-1.5 bg-[#BC25F9] rounded-full" />
+                  <span className="text-[10px] font-medium text-[#BC25F9] uppercase tracking-wide">Powered by FDA</span>
                 </span>
               )}
             </div>
@@ -289,7 +289,7 @@ export default function MedicationDetailPage() {
                     <h4 className="text-xs font-medium text-[#71717A] uppercase tracking-wide mb-1.5">Active Ingredients</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {drugInfo.activeIngredients.map((ing, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-[#1C1C1F] rounded-lg text-sm text-[#FAFAFA]">
+                        <span key={i} className="px-2.5 py-1 bg-[#151517] rounded-lg text-sm text-[#FAFAFA]">
                           {ing}
                         </span>
                       ))}
@@ -348,7 +348,7 @@ export default function MedicationDetailPage() {
                     <h4 className="text-xs font-medium text-[#71717A] uppercase tracking-wide mb-1.5">Available Forms</h4>
                     <div className="flex flex-wrap gap-1.5">
                       {drugInfo.dosageForms.map((form, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-[#1C1C1F] rounded-lg text-sm text-[#FAFAFA]">
+                        <span key={i} className="px-2.5 py-1 bg-[#151517] rounded-lg text-sm text-[#FAFAFA]">
                           {form}
                         </span>
                       ))}
@@ -358,7 +358,7 @@ export default function MedicationDetailPage() {
 
                 {/* FDA badge */}
                 <div className="flex items-center gap-2 pt-1 border-t border-[#27272A]">
-                  <span className="text-[10px] text-[#22D3EE] font-medium uppercase tracking-wide flex items-center gap-1">
+                  <span className="text-[10px] text-[#BC25F9] font-medium uppercase tracking-wide flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
@@ -381,7 +381,7 @@ export default function MedicationDetailPage() {
         {isPremium ? (
           <button
             onClick={() => navigate(`/monica?explain=${med.id}&name=${encodeURIComponent(med.name)}`)}
-            className="w-full bg-gradient-to-r from-[#2DE2A0] to-[#22D3EE] text-[#0A0A0B] font-semibold text-[17px] py-3.5 rounded-2xl hover:from-[#24B882] hover:to-[#06B6D4] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(45,226,160,0.3)]"
+            className="w-full bg-gradient-to-r from-[#BC25F9] to-[#BC25F9] text-[#0A0A0B] font-semibold text-[17px] py-3.5 rounded-2xl hover:from-[#A020F0] hover:to-[#06B6D4] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(188,37,249,0.3)]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
@@ -389,7 +389,7 @@ export default function MedicationDetailPage() {
             Explain with Monica AI
           </button>
         ) : (
-          <div className="w-full bg-[#161618] border border-[#27272A] rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-full bg-[#111113] border border-[#27272A] rounded-2xl p-4 flex items-center gap-3">
             <div className="w-8 h-8 bg-[#FBBF24]/10 rounded-lg flex items-center justify-center flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -410,7 +410,7 @@ export default function MedicationDetailPage() {
         )}
         <button
           onClick={() => setShowEdit(true)}
-          className="w-full bg-[#2DE2A0] text-white font-semibold text-[17px] py-3.5 rounded-2xl btn-glow hover:bg-[#24B882] active:scale-[0.98] transition-all duration-200"
+          className="w-full bg-[#BC25F9] text-white font-semibold text-[17px] py-3.5 rounded-2xl btn-glow shadow-[0_0_16px_rgba(188,37,249,0.35)] hover:bg-[#A020F0] active:scale-[0.98] transition-all duration-200"
         >
           Edit Medication
         </button>
@@ -423,7 +423,7 @@ export default function MedicationDetailPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 bg-[#1C1C1F] text-[#A1A1AA] font-medium py-2.5 rounded-xl border border-[#27272A] hover:bg-[#27272A] transition-colors duration-200"
+                className="flex-1 bg-[#151517] text-[#A1A1AA] font-medium py-2.5 rounded-xl border border-[#27272A] hover:bg-[#27272A] transition-colors duration-200"
               >
                 Cancel
               </button>

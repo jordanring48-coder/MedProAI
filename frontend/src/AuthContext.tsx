@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import type { User } from "./types";
 
-const TOKEN_KEY = "medchron_token";
+const TOKEN_KEY = "luna_token";
 
 interface AuthState {
   user: User | null;

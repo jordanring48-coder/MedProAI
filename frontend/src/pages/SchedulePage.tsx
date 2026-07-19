@@ -134,13 +134,13 @@ export default function SchedulePage() {
   return (
     <div className="pb-24 min-h-screen">
       {/* Header */}
-      <div className="relative bg-gradient-to-b from-[#22D3EE]/20 to-transparent pt-14 pb-4 px-5">
+      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-4 px-5">
         <div className="absolute right-5 top-3">
           <UserAvatar />
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-[#22D3EE]/10 rounded-xl flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <div className="w-8 h-8 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
@@ -170,13 +170,13 @@ export default function SchedulePage() {
           if (isSelToday) {
             // Today + selected: mint filled with glow
             pillClasses +=
-              " bg-[#2DE2A0] text-[#0A0A0B] font-bold shadow-[0_0_12px_rgba(45,226,160,0.3)]";
+              " bg-[#BC25F9] text-[#0A0A0B] font-bold shadow-[0_0_12px_rgba(188,37,249,0.3)]";
           } else if (isSel) {
             // Selected but not today: mint border
-            pillClasses += " border-2 border-[#2DE2A0] text-[#FAFAFA]";
+            pillClasses += " border-2 border-[#BC25F9] text-[#FAFAFA]";
           } else if (isTodayDate) {
             // Today but not selected: subtle highlight
-            pillClasses += " text-[#2DE2A0] font-semibold";
+            pillClasses += " text-[#BC25F9] font-semibold";
           } else {
             // Other days
             pillClasses += " text-[#71717A]";
@@ -202,12 +202,12 @@ export default function SchedulePage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-[#161618] rounded-3xl p-5 border border-[#27272A] animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+              className="bg-[#111113] rounded-3xl p-5 border border-[#27272A] animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
             >
               <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
               <div className="space-y-2">
                 <div className="h-3 bg-[#27272A] rounded w-full" />
-                <div className="h-3 bg-[#1C1C1F] rounded w-3/4" />
+                <div className="h-3 bg-[#151517] rounded w-3/4" />
               </div>
             </div>
           ))}
@@ -218,13 +218,13 @@ export default function SchedulePage() {
       {!loading && (
         <div className="space-y-4">
           {visibleBuckets.length === 0 ? (
-            <div className="bg-[#161618] rounded-3xl p-8 border border-[#27272A] text-center shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-              <div className="w-16 h-16 bg-[#2DE2A0]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-[#111113] rounded-3xl p-8 border border-[#27272A] text-center shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+              <div className="w-16 h-16 bg-[#BC25F9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#2DE2A0"
+                  stroke="#BC25F9"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -244,10 +244,10 @@ export default function SchedulePage() {
             visibleBuckets.map((bucket) => (
               <div
                 key={bucket.label}
-                className="bg-[#161618] rounded-3xl border border-[#27272A] overflow-hidden transition-opacity duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                className="bg-[#111113] rounded-3xl border border-[#27272A] overflow-hidden transition-opacity duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
               >
                 {/* Time-of-day header */}
-                <div className="px-5 py-2.5 bg-[#1C1C1F]/60">
+                <div className="px-5 py-2.5 bg-[#151517]/60">
                   <span className="text-[#71717A] text-xs font-semibold uppercase tracking-wider">
                     {bucket.label}
                   </span>
@@ -288,7 +288,7 @@ function DoseRow({ dose }: { dose: Dose }) {
   const effectiveStatus = isPastPending ? "missed" : status;
 
   const dotStyle: Record<string, string> = {
-    taken: "bg-[#2DE2A0]",
+    taken: "bg-[#BC25F9]",
     missed: "bg-[#F87171]",
     skipped: "bg-[#52525B]",
     pending: "border-2 border-[#3F3F46]",
@@ -310,7 +310,7 @@ function DoseRow({ dose }: { dose: Dose }) {
       <svg
         viewBox="0 0 24 24"
         fill="none"
-        stroke={effectiveStatus === "taken" ? "#2DE2A0" : effectiveStatus === "missed" ? "#F87171" : effectiveStatus === "skipped" ? "#52525B" : "#A1A1AA"}
+        stroke={effectiveStatus === "taken" ? "#BC25F9" : effectiveStatus === "missed" ? "#F87171" : effectiveStatus === "skipped" ? "#52525B" : "#A1A1AA"}
         strokeWidth="2"
         className="w-4 h-4 flex-shrink-0"
         strokeLinecap="round"
@@ -342,7 +342,7 @@ function AppointmentRow({
   return (
     <div className={`px-5 py-3.5 flex items-center gap-3 ${muted}`}>
       {/* Status dot — cyan */}
-      <div className="w-3 h-3 rounded-full flex-shrink-0 bg-[#22D3EE]" />
+      <div className="w-3 h-3 rounded-full flex-shrink-0 bg-[#BC25F9]" />
 
       {/* Time */}
       <span className="text-sm font-medium text-[#FAFAFA] w-14 flex-shrink-0 tabular-nums">
@@ -353,7 +353,7 @@ function AppointmentRow({
       <svg
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#22D3EE"
+        stroke="#BC25F9"
         strokeWidth="2"
         className="w-4 h-4 flex-shrink-0"
       >

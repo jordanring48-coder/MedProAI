@@ -10,13 +10,13 @@ export default function OnboardingModal({ onDismiss }: OnboardingModalProps) {
         <div className="flex flex-col items-center pt-12 pb-8">
           <img
             src="/app-logo.png"
-            className="w-16 h-16 rounded-2xl mb-4"
+            className="w-24 h-24 rounded-2xl mb-4"
             style={{
-              boxShadow: "0 4px 24px rgba(45, 226, 160, 0.35)",
+              boxShadow: "0 4px 24px rgba(188, 37, 249, 0.35)",
             }}
-            alt="MedTrack AI"
+            alt="Luna"
           />
-          <h1 className="text-2xl font-bold text-white">MedTrack AI</h1>
+          <h1 className="text-2xl font-bold text-white">Luna</h1>
           <p className="text-[#A1A1AA] mt-2 text-sm">Your personal medication companion</p>
         </div>
 
@@ -48,7 +48,7 @@ export default function OnboardingModal({ onDismiss }: OnboardingModalProps) {
         <div className="bg-[#FBBF24]/5 border border-[#FBBF24]/20 rounded-2xl p-5 w-full max-w-md mb-8">
           <h3 className="text-[#FBBF24] font-semibold text-sm mb-3">Important Disclaimer</h3>
           <p className="text-[#FBBF24]/70 text-sm leading-relaxed">
-            MedTrack AI is a medication management tool and does not replace professional medical
+            Luna is a medication management tool and does not replace professional medical
             advice. Monica AI is an assistant, not a diagnostic tool. Always consult your doctor or
             pharmacist before making changes to your medication regimen. If you are experiencing a
             medical emergency, call 911 immediately.
@@ -62,9 +62,9 @@ export default function OnboardingModal({ onDismiss }: OnboardingModalProps) {
         <div className="sticky bottom-0 w-full max-w-md pb-24 bg-[#0A0A0B] pt-4">
           <button
             onClick={onDismiss}
-            className="w-full bg-[#2DE2A0] text-[#0A0A0B] font-semibold text-[17px] py-4 rounded-2xl active:scale-[0.98] transition-transform"
+            className="w-full bg-[#BC25F9] text-[#0A0A0B] font-semibold text-[17px] py-4 rounded-2xl active:scale-[0.98] transition-transform shadow-[0_0_16px_rgba(188,37,249,0.35)]"
             style={{
-              boxShadow: "0 4px 20px rgba(45, 226, 160, 0.3)",
+              boxShadow: "0 4px 20px rgba(188, 37, 249, 0.3)",
             }}
           >
             I understand
@@ -86,8 +86,8 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="bg-[#161618] rounded-2xl p-4 border border-[#27272A] flex flex-col gap-2">
-      <Icon className="text-[#2DE2A0] w-6 h-6" />
+    <div className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] flex flex-col gap-2">
+      <Icon className="text-[#BC25F9] w-6 h-6" />
       <span className="text-white font-semibold text-sm leading-tight">{title}</span>
       <span className="text-[#A1A1AA] text-xs leading-relaxed">{description}</span>
     </div>

@@ -5,7 +5,7 @@ export default function UserAvatar() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const initial = (user?.name || user?.email || "U").charAt(0).toUpperCase();
-  const color = user?.avatarColor || "#2DE2A0";
+  const color = user?.avatarColor || "#BC25F9";
 
   return (
     <button

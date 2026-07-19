@@ -22,7 +22,7 @@ export default function PremiumGate({ children, fallback, featureName }: Props) 
   return (
     <div className="relative">
       {/* Upgrade banner */}
-      <div className="bg-gradient-to-r from-[#2DE2A0]/10 to-[#24B882]/10 border-b border-[#2DE2A0]/20 px-4 py-3">
+      <div className="bg-gradient-to-r from-[#BC25F9]/10 to-[#A020F0]/10 border-b border-[#BC25F9]/20 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-lg flex-shrink-0">✨</span>
@@ -34,7 +34,7 @@ export default function PremiumGate({ children, fallback, featureName }: Props) 
           </div>
           <button
             onClick={() => navigate("/paywall")}
-            className="flex-shrink-0 bg-[#2DE2A0] text-[#0A0A0B] font-semibold text-xs px-4 py-2 rounded-xl hover:bg-[#24B882] active:scale-[0.97] transition-all"
+            className="flex-shrink-0 bg-[#BC25F9] text-[#0A0A0B] font-semibold text-xs px-4 py-2 rounded-xl hover:bg-[#A020F0] active:scale-[0.97] transition-all"
           >
             View Plans
           </button>

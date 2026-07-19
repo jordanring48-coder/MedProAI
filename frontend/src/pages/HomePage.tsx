@@ -24,7 +24,7 @@ function MintRing({ percentage, size = 100, strokeWidth = 8, celebrating = false
             return (
               <div
                 key={i}
-                className="absolute w-1.5 h-1.5 bg-[#2DE2A0] rounded-full"
+                className="absolute w-1.5 h-1.5 bg-[#BC25F9] rounded-full"
                 style={{
                   top: "50%",
                   left: "50%",
@@ -41,7 +41,7 @@ function MintRing({ percentage, size = 100, strokeWidth = 8, celebrating = false
       <svg
         width={size}
         height={size}
-        className={`-rotate-90 ${celebrating ? "drop-shadow-[0_0_30px_rgba(45,226,160,0.6)]" : "drop-shadow-[0_0_12px_rgba(45,226,160,0.3)]"} transition-all duration-500`}
+        className={`-rotate-90 ${celebrating ? "drop-shadow-[0_0_30px_rgba(188,37,249,0.6)]" : "drop-shadow-[0_0_12px_rgba(188,37,249,0.4)]"} transition-all duration-500`}
       >
         <circle
           cx={size / 2} cy={size / 2} r={radius}
@@ -49,12 +49,12 @@ function MintRing({ percentage, size = 100, strokeWidth = 8, celebrating = false
         />
         <circle
           cx={size / 2} cy={size / 2} r={radius}
-          stroke="#2DE2A0" strokeWidth={strokeWidth} fill="none"
+          stroke="#BC25F9" strokeWidth={strokeWidth} fill="none"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           className="transition-all duration-1000 ease-out"
-          style={{ filter: celebrating ? "drop-shadow(0 0 10px rgba(45,226,160,0.6))" : "drop-shadow(0 0 6px rgba(45,226,160,0.4))" }}
+          style={{ filter: celebrating ? "drop-shadow(0 0 10px rgba(188,37,249,0.6))" : "drop-shadow(0 0 12px rgba(188,37,249,0.4))" }}
         />
       </svg>
       <span className="absolute text-2xl font-bold text-[#FAFAFA]">
@@ -75,7 +75,7 @@ function getTimeIcon() {
   const hour = new Date().getHours();
   if (hour < 17) {
     return (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#2DE2A0] flex-shrink-0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#BC25F9] flex-shrink-0">
         <circle cx="12" cy="12" r="5" />
         <line x1="12" y1="1" x2="12" y2="3" />
         <line x1="12" y1="21" x2="12" y2="23" />
@@ -89,7 +89,7 @@ function getTimeIcon() {
     );
   }
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#2DE2A0] flex-shrink-0">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#BC25F9] flex-shrink-0">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </svg>
   );
@@ -179,9 +179,12 @@ export default function HomePage() {
   return (
     <div className="pb-24 min-h-screen">
       {/* Greeting */}
-      <div className="relative bg-gradient-to-b from-[#2DE2A0]/20 to-transparent pt-14 pb-6 px-5">
+      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-6 px-5">
         <div className="absolute right-5 top-3">
           <UserAvatar />
+        </div>
+        <div className="flex justify-center mb-4">
+          <img src="/luna-header.png" alt="Luna" className="h-16 object-contain" />
         </div>
         <div className="flex items-center gap-2 mb-1">
           {getTimeIcon()}
@@ -195,13 +198,13 @@ export default function HomePage() {
       {/* Loading skeleton */}
       {loading && (
         <div className="space-y-4">
-          <div className="bg-[#161618] rounded-3xl p-6 border border-[#27272A] animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+          <div className="bg-[#111113] rounded-3xl p-6 border border-[#27272A] animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
             <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
             <div className="flex items-center gap-6">
               <div className="w-[100px] h-[100px] bg-[#27272A] rounded-full" />
               <div className="flex-1 space-y-3">
                 <div className="h-4 bg-[#27272A] rounded w-3/4" />
-                <div className="h-3 bg-[#1C1C1F] rounded w-1/2" />
+                <div className="h-3 bg-[#151517] rounded w-1/2" />
               </div>
             </div>
           </div>
@@ -213,7 +216,7 @@ export default function HomePage() {
           {/* Today's Meds Status Card */}
           <button
             onClick={() => navigate("/tracker")}
-            className="w-full text-left bg-[#161618] rounded-3xl p-6 border border-[#27272A] mb-4 hover:border-[#3F3F46] active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+            className="w-full text-left bg-[#111113] rounded-3xl p-6 border border-[#27272A] mb-4 hover:border-[#3F3F46] active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
           >
             <div className="flex items-center gap-5">
               <MintRing percentage={adherencePct} size={90} strokeWidth={7} celebrating={celebrating} />
@@ -227,11 +230,11 @@ export default function HomePage() {
                     : "No doses scheduled today"}
                 </p>
                 {totalToday > 0 && takenToday === totalToday && (
-                  <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-[#2DE2A0]/10 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2DE2A0" className="w-3.5 h-3.5">
+                  <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-[#BC25F9]/10 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#BC25F9" className="w-3.5 h-3.5">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                     </svg>
-                    <span className="text-xs font-semibold text-[#2DE2A0]">All done!</span>
+                    <span className="text-xs font-semibold text-[#BC25F9]">All done!</span>
                   </span>
                 )}
               </div>
@@ -245,7 +248,7 @@ export default function HomePage() {
           {streakCount >= 2 && (
             <button
               onClick={() => navigate("/timeline")}
-              className="w-full text-left bg-[#161618] rounded-3xl p-4 border border-[#FBBF24]/20 mb-4 hover:border-[#FBBF24]/40 active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+              className="w-full text-left bg-[#111113] rounded-3xl p-4 border border-[#FBBF24]/20 mb-4 hover:border-[#FBBF24]/40 active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
               style={{ boxShadow: "0 0 20px rgba(251, 191, 36, 0.08)" }}
             >
               <div className="flex items-center gap-4">
@@ -270,11 +273,11 @@ export default function HomePage() {
           {/* Adherence (7d) Card */}
           <button
             onClick={() => navigate("/timeline")}
-            className="w-full text-left bg-[#161618] rounded-3xl p-6 border border-[#27272A] mb-4 hover:border-[#3F3F46] active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+            className="w-full text-left bg-[#111113] rounded-3xl p-6 border border-[#27272A] mb-4 hover:border-[#3F3F46] active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#2DE2A0]/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+              <div className="w-12 h-12 bg-[#BC25F9]/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
                   <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
                 </svg>
               </div>
@@ -293,7 +296,7 @@ export default function HomePage() {
               <span className={
                 adherence7d === -1
                   ? "text-2xl font-bold text-[#52525B]"
-                  : "text-2xl font-bold text-[#2DE2A0]"
+                  : "text-2xl font-bold text-[#BC25F9]"
               }>
                 {adherence7d === -1 ? "—" : `${adherence7d}%`}
               </span>
@@ -301,14 +304,14 @@ export default function HomePage() {
           </button>
 
           {/* Upcoming Card */}
-          <div className="bg-[#161618] rounded-3xl border border-[#27272A] overflow-hidden mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+          <div className="bg-[#111113] rounded-3xl border border-[#27272A] overflow-hidden mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
             {/* Next dose */}
             <button
               onClick={() => navigate("/tracker")}
-              className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#1C1C1F]/60 transition-colors duration-200"
+              className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#151517]/60 transition-colors duration-200"
             >
-              <div className="w-10 h-10 bg-[#2DE2A0]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
@@ -329,10 +332,10 @@ export default function HomePage() {
             {/* Next appointment (premium) */}
             <button
               onClick={() => navigate("/schedule")}
-              className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#1C1C1F]/60 transition-colors duration-200"
+              className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#151517]/60 transition-colors duration-200"
             >
-              <div className="w-10 h-10 bg-[#22D3EE]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
                   <line x1="8" y1="2" x2="8" y2="6" />
@@ -359,10 +362,10 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-3 mb-6">
             <button
               onClick={() => setShowSymptomModal(true)}
-              className="bg-[#161618] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
+              className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
             >
-              <div className="w-10 h-10 bg-[#22D3EE]/10 rounded-xl flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
@@ -372,10 +375,10 @@ export default function HomePage() {
 
             <button
               onClick={() => setShowAddMedModal(true)}
-              className="bg-[#161618] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
+              className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
             >
-              <div className="w-10 h-10 bg-[#2DE2A0]/10 rounded-xl flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
               </div>
@@ -384,7 +387,7 @@ export default function HomePage() {
 
             <button
               onClick={() => navigate("/timeline")}
-              className="bg-[#161618] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
+              className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
             >
               <div className="w-10 h-10 bg-[#FBBF24]/10 rounded-xl flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -400,12 +403,12 @@ export default function HomePage() {
 
           {/* Medication summary */}
           {meds.length > 0 && (
-            <div className="bg-[#161618] rounded-3xl border border-[#27272A] p-5 mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+            <div className="bg-[#111113] rounded-3xl border border-[#27272A] p-5 mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[17px] font-semibold text-[#FAFAFA]">Your Medications</h3>
                 <button
                   onClick={() => navigate("/tracker")}
-                  className="text-sm font-medium text-[#2DE2A0] hover:underline"
+                  className="text-sm font-medium text-[#BC25F9] hover:underline"
                 >
                   View all
                 </button>
@@ -416,7 +419,7 @@ export default function HomePage() {
                     key={med.id}
                     className="flex items-center gap-3 py-2"
                   >
-                    <div className="w-2 h-2 bg-[#2DE2A0] rounded-full flex-shrink-0" />
+                    <div className="w-2 h-2 bg-[#BC25F9] rounded-full flex-shrink-0" />
                     <span className="text-[15px] text-[#FAFAFA] truncate flex-1">{med.name}</span>
                     {med.dosage && (
                       <span className="text-sm text-[#71717A]">{med.dosage}</span>

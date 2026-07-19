@@ -91,7 +91,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
   if (savedAnimation) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-        <div className="bg-[#161618] rounded-2xl p-8 shadow-xl border border-[#27272A] text-center animate-in zoom-in-95 duration-300">
+        <div className="bg-[#111113] rounded-2xl p-8 shadow-xl border border-[#27272A] text-center animate-in zoom-in-95 duration-300">
           <div className="w-16 h-16 bg-[#34D399]/10 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#34D399" className="w-8 h-8">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
@@ -106,7 +106,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-[#161618] rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300 border border-[#27272A]">
+      <div className="bg-[#111113] rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300 border border-[#27272A]">
         <form onSubmit={handleSubmit}>
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-[#27272A]">
@@ -115,7 +115,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="w-8 h-8 bg-[#1C1C1F] rounded-full flex items-center justify-center hover:bg-[#27272A] transition-colors"
+              className="w-8 h-8 bg-[#151517] rounded-full flex items-center justify-center hover:bg-[#27272A] transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#71717A" className="w-4 h-4">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
@@ -146,13 +146,13 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
                 }}
                 onFocus={() => setShowSuggestions(true)}
                 placeholder="e.g. Headache, Nausea..."
-                className="w-full bg-[#1C1C1F] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#2DE2A0]/40 focus:bg-[#1C1C1F] transition-colors"
+                className="w-full bg-[#151517] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/40 focus:bg-[#151517] transition-colors"
                 autoComplete="off"
               />
               {showSuggestions && filtered.length > 0 && (
                 <div
                   ref={suggestionsRef}
-                  className="absolute top-full left-0 right-0 bg-[#1C1C1F] border border-[#3F3F46] rounded-xl shadow-lg mt-1 z-10 overflow-hidden"
+                  className="absolute top-full left-0 right-0 bg-[#151517] border border-[#3F3F46] rounded-xl shadow-lg mt-1 z-10 overflow-hidden"
                 >
                   {filtered.map((s) => (
                     <button
@@ -196,7 +196,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
                               : level <= 4
                               ? "bg-[#F97316] text-white shadow-sm"
                               : "bg-[#F87171] text-white shadow-sm"
-                            : "bg-[#1C1C1F] text-[#71717A]"
+                            : "bg-[#151517] text-[#71717A]"
                         }`}
                       >
                         {level}
@@ -222,7 +222,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
                   onChange={(e) =>
                     setMedicationId(e.target.value ? Number(e.target.value) : null)
                   }
-                  className="w-full bg-[#1C1C1F] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#2DE2A0]/40 transition-colors appearance-none"
+                  className="w-full bg-[#151517] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/40 transition-colors appearance-none"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z' fill='%2371717A'/%3E%3C/svg%3E")`,
                     backgroundRepeat: "no-repeat",
@@ -250,7 +250,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any additional details..."
                 rows={2}
-                className="w-full bg-[#1C1C1F] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#2DE2A0]/40 transition-colors resize-none"
+                className="w-full bg-[#151517] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/40 transition-colors resize-none"
               />
             </div>
 
@@ -263,7 +263,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
                 type="datetime-local"
                 value={loggedAt}
                 onChange={(e) => setLoggedAt(e.target.value)}
-                className="w-full bg-[#1C1C1F] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#2DE2A0]/40 transition-colors color-scheme-dark"
+                className="w-full bg-[#151517] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/40 transition-colors color-scheme-dark"
               />
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function LogSymptomModal({ onClose, onSaved, initialValues }: Pro
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-[#2DE2A0] text-white font-semibold text-[17px] py-3.5 rounded-2xl shadow-sm hover:bg-[#24B882] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#BC25F9] text-white font-semibold text-[17px] py-3.5 rounded-2xl shadow-sm shadow-[0_0_16px_rgba(188,37,249,0.35)] hover:bg-[#A020F0] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? "Saving..." : "Log Symptom"}
             </button>

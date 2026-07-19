@@ -74,24 +74,25 @@ function AuthPageInner({
       <div className="w-full max-w-md">
         {/* Logo / Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#007AFF]/15 rounded-2xl mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#007AFF" className="w-8 h-8">
-              <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-1">MedTrack AI</h1>
+          <img
+            src="/app-logo.png"
+            alt="Luna"
+            className="w-20 h-20 rounded-2xl mb-4"
+            style={{ boxShadow: "0 4px 24px rgba(188, 37, 249, 0.35)" }}
+          />
+          <h1 className="text-2xl font-bold text-white mb-1">Luna</h1>
           <p className="text-gray-500 text-sm">Your medication, on your timeline</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[#1C1C1E] rounded-2xl border border-[#2C2C2E] p-6">
+        <div className="bg-[#151517] rounded-2xl border border-[#27272A] p-6">
           {/* Tabs */}
-          <div className="flex mb-6 bg-[#2C2C2E] rounded-xl p-1">
+          <div className="flex mb-6 bg-[#27272A] rounded-xl p-1">
             <button
               onClick={() => { setTab("login"); setError(null); }}
               className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
                 tab === "login"
-                  ? "bg-[#007AFF] text-white"
+                  ? "bg-[#BC25F9] text-white"
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
@@ -101,7 +102,7 @@ function AuthPageInner({
               onClick={() => { setTab("signup"); setError(null); }}
               className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
                 tab === "signup"
-                  ? "bg-[#007AFF] text-white"
+                  ? "bg-[#BC25F9] text-white"
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
@@ -128,7 +129,7 @@ function AuthPageInner({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                  className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
                 />
               </div>
             )}
@@ -143,7 +144,7 @@ function AuthPageInner({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 autoComplete="email"
-                className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
               />
             </div>
 
@@ -157,7 +158,7 @@ function AuthPageInner({
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 autoComplete={tab === "login" ? "current-password" : "new-password"}
-                className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
               />
             </div>
 
@@ -172,7 +173,7 @@ function AuthPageInner({
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                  className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
                 />
               </div>
             )}
@@ -180,7 +181,7 @@ function AuthPageInner({
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-[#007AFF] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#0066D6] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#BC25F9] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#A020F0] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_16px_rgba(188,37,249,0.35)]"
             >
               {submitting
                 ? "Please wait..."
@@ -195,7 +196,7 @@ function AuthPageInner({
             <div className="mt-4 text-center">
               <Link
                 to="/forgot-password"
-                className="text-sm text-[#007AFF] hover:underline"
+                className="text-sm text-[#BC25F9] hover:underline"
               >
                 Forgot password?
               </Link>
@@ -204,7 +205,7 @@ function AuthPageInner({
         </div>
 
         <p className="text-center text-xs text-gray-600 mt-6">
-          MedTrack AI v0.4.0
+          Luna v0.4.0
         </p>
       </div>
     </div>

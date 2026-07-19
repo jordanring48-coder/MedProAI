@@ -48,8 +48,8 @@ function DoseIcon({ status }: { status: string }) {
   switch (status) {
     case "taken":
       return (
-        <div className="w-9 h-9 bg-[#2DE2A0]/10 rounded-full flex items-center justify-center flex-shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+        <div className="w-9 h-9 bg-[#BC25F9]/10 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
@@ -74,7 +74,7 @@ function DoseIcon({ status }: { status: string }) {
       );
     default:
       return (
-        <div className="w-9 h-9 bg-[#1C1C1F] rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 bg-[#151517] rounded-full flex items-center justify-center flex-shrink-0">
           <div className="w-2.5 h-2.5 bg-[#71717A] rounded-full" />
         </div>
       );
@@ -199,14 +199,14 @@ export default function TimelinePage() {
       {loading && (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-[#161618] rounded-3xl p-4 border border-[#27272A] animate-pulse">
+            <div key={i} className="bg-[#111113] rounded-3xl p-4 border border-[#27272A] animate-pulse">
               <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
               <div className="space-y-3">
                 <div className="flex gap-3">
                   <div className="w-9 h-9 bg-[#27272A] rounded-full" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-[#27272A] rounded w-3/4" />
-                    <div className="h-3 bg-[#1C1C1F] rounded w-1/2" />
+                    <div className="h-3 bg-[#151517] rounded w-1/2" />
                   </div>
                 </div>
               </div>
@@ -217,7 +217,7 @@ export default function TimelinePage() {
 
       {/* Error */}
       {!loading && error && (
-        <div className="bg-[#161618] rounded-3xl p-8 border border-[#27272A] text-center">
+        <div className="bg-[#111113] rounded-3xl p-8 border border-[#27272A] text-center">
           <div className="w-16 h-16 bg-[#F87171]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
               <circle cx="12" cy="12" r="10" />
@@ -227,7 +227,7 @@ export default function TimelinePage() {
           </div>
           <p className="text-[#FAFAFA] font-medium mb-1">Something went wrong</p>
           <p className="text-sm text-[#A1A1AA] mb-4">{error}</p>
-          <button onClick={loadTimeline} className="text-[#2DE2A0] font-medium hover:underline">
+          <button onClick={loadTimeline} className="text-[#BC25F9] font-medium hover:underline">
             Try Again
           </button>
         </div>
@@ -235,9 +235,9 @@ export default function TimelinePage() {
 
       {/* Empty state */}
       {!loading && !error && !hasData && (
-        <div className="bg-[#161618] rounded-3xl p-8 border border-[#27272A] text-center">
-          <div className="w-16 h-16 bg-[#2DE2A0]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2DE2A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+        <div className="bg-[#111113] rounded-3xl p-8 border border-[#27272A] text-center">
+          <div className="w-16 h-16 bg-[#BC25F9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
@@ -260,7 +260,7 @@ export default function TimelinePage() {
                 <span>Doses appear when you set a frequency on your medication</span>
               </div>
               <div className="flex items-center gap-2 justify-center">
-                <div className="w-2 h-2 bg-[#22D3EE] rounded-full" />
+                <div className="w-2 h-2 bg-[#BC25F9] rounded-full" />
                 <span>Log symptoms from the Tracker tab to track your health patterns</span>
               </div>
             </div>
@@ -279,19 +279,19 @@ export default function TimelinePage() {
             return (
               <div
                 key={group.date}
-                className="bg-[#161618] rounded-3xl border border-[#27272A] overflow-hidden transition-all duration-300"
+                className="bg-[#111113] rounded-3xl border border-[#27272A] overflow-hidden transition-all duration-300"
               >
                 {/* Date header — tappable */}
                 <button
                   onClick={() => toggleGroup(group.date)}
-                  className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[#1C1C1F]/60 transition-colors duration-200"
+                  className="w-full px-5 py-3.5 flex items-center justify-between hover:bg-[#151517]/60 transition-colors duration-200"
                 >
                   <div className="flex items-center gap-3">
                     {isTodayGroup && (
-                      <span className="w-2 h-2 bg-[#2DE2A0] rounded-full shadow-[0_0_8px_rgba(45,226,160,0.4)]" />
+                      <span className="w-2 h-2 bg-[#BC25F9] rounded-full shadow-[0_0_8px_rgba(188,37,249,0.4)]" />
                     )}
                     <h2 className={`text-sm font-semibold ${
-                      isTodayGroup ? "text-[#2DE2A0]" : "text-[#A1A1AA]"
+                      isTodayGroup ? "text-[#BC25F9]" : "text-[#A1A1AA]"
                     }`}>
                       {group.label}
                     </h2>
@@ -326,7 +326,7 @@ export default function TimelinePage() {
                       if (entry.type === "dose") {
                         const status = entry.status || "pending";
                         return (
-                          <div key={entry.id} className="px-5 py-3.5 flex items-center gap-3 hover:bg-[#1C1C1F]/40 transition-colors duration-150">
+                          <div key={entry.id} className="px-5 py-3.5 flex items-center gap-3 hover:bg-[#151517]/40 transition-colors duration-150">
                             <DoseIcon status={status} />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
@@ -343,7 +343,7 @@ export default function TimelinePage() {
                                 <span
                                   className={`text-xs font-medium ${
                                     status === "taken"
-                                      ? "text-[#2DE2A0]"
+                                      ? "text-[#BC25F9]"
                                       : status === "missed"
                                       ? "text-[#F87171]"
                                       : status === "skipped"
@@ -374,7 +374,7 @@ export default function TimelinePage() {
                       return (
                         <div
                           key={entry.id}
-                          className="px-5 py-3.5 flex items-center gap-3 hover:bg-[#1C1C1F]/40 transition-colors duration-150"
+                          className="px-5 py-3.5 flex items-center gap-3 hover:bg-[#151517]/40 transition-colors duration-150"
                           style={{
                             background:
                               sev >= 4
@@ -392,7 +392,7 @@ export default function TimelinePage() {
                             </div>
                             <SeverityBar severity={sev} />
                             {entry.medication_name && (
-                              <p className="text-xs text-[#2DE2A0] mt-1">
+                              <p className="text-xs text-[#BC25F9] mt-1">
                                 Linked: {entry.medication_name}
                               </p>
                             )}

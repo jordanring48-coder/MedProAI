@@ -21,7 +21,7 @@ import type {
 } from "./types";
 
 const BASE = "/api/medications";
-const TOKEN_KEY = "medchron_token";
+const TOKEN_KEY = "luna_token";
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem(TOKEN_KEY);

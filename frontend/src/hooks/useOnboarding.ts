@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const ONBOARDING_KEY = "medtrack_onboarding_acknowledged";
+const ONBOARDING_KEY = "luna_onboarding_acknowledged";
 
 export function useOnboarding() {
   const [showOnboarding, setShowOnboarding] = useState(false);

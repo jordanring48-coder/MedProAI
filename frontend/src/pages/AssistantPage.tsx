@@ -603,11 +603,11 @@ export default function AssistantPage() {
     };
 
     return (
-      <div className="bg-[#1C1C1F] rounded-2xl border border-[#2DE2A0]/30 p-4 w-full">
+      <div className="bg-[#151517] rounded-2xl border border-[#BC25F9]/30 p-4 w-full">
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-[#2DE2A0]">{getIcon()}</span>
-          <span className="text-sm font-semibold text-[#2DE2A0]">I'll add: {getTitle()}</span>
+          <span className="text-[#BC25F9]">{getIcon()}</span>
+          <span className="text-sm font-semibold text-[#BC25F9]">I'll add: {getTitle()}</span>
         </div>
 
         {/* Edit hint */}
@@ -624,7 +624,7 @@ export default function AssistantPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleConfirm}
-            className="flex-1 bg-[#2DE2A0] text-[#0A0A0B] font-semibold text-sm py-2.5 rounded-xl hover:bg-[#24B882] active:scale-[0.97] transition-all"
+            className="flex-1 bg-[#BC25F9] text-[#0A0A0B] font-semibold text-sm py-2.5 rounded-xl hover:bg-[#A020F0] active:scale-[0.97] transition-all shadow-[0_0_16px_rgba(188,37,249,0.35)]"
           >
             Confirm
           </button>
@@ -724,7 +724,7 @@ export default function AssistantPage() {
           <UserAvatar />
         </div>
         <div className="flex items-center gap-3">
-          <img src="/monica-icon.png" alt="Monica AI" className="w-11 h-11 rounded-2xl object-cover shadow-[0_0_20px_rgba(45,226,160,0.2)]" />
+          <img src="/monica-icon.png" alt="Monica AI" className="w-12 h-12 rounded-full object-cover shadow-[0_0_20px_rgba(188,37,249,0.2)]" />
           <div>
             <h1 className="text-xl font-bold text-[#FAFAFA] tracking-tight">Monica</h1>
             <p className="text-xs text-[#A1A1AA]">Your AI health assistant</p>
@@ -744,7 +744,7 @@ export default function AssistantPage() {
         {messages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             {/* Monica avatar */}
-            <img src="/monica-icon.png" alt="Monica AI" className="w-20 h-20 rounded-3xl object-cover mb-5 shadow-[0_0_40px_rgba(45,226,160,0.2)]" />
+            <img src="/monica-icon.png" alt="Monica AI" className="w-20 h-20 rounded-3xl object-cover mb-5 shadow-[0_0_40px_rgba(188,37,249,0.2)]" />
             <h2 className="text-lg font-bold text-[#FAFAFA] mb-1.5 tracking-tight">
               Hi, I'm Monica
             </h2>
@@ -758,9 +758,9 @@ export default function AssistantPage() {
                 <button
                   key={qa.label}
                   onClick={qa.action}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-[#161618] rounded-xl border border-[#27272A] text-sm text-[#A1A1AA] hover:border-[#2DE2A0]/40 hover:text-[#2DE2A0] hover:bg-[#2DE2A0]/5 transition-all active:scale-[0.97] duration-200"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#111113] rounded-xl border border-[#27272A] text-sm text-[#A1A1AA] hover:border-[#BC25F9]/40 hover:text-[#BC25F9] hover:bg-[#BC25F9]/5 transition-all active:scale-[0.97] duration-200"
                 >
-                  <span className="text-[#2DE2A0]">{qa.icon}</span>
+                  <span className="text-[#BC25F9]">{qa.icon}</span>
                   {qa.label}
                 </button>
               ))}
@@ -781,8 +781,8 @@ export default function AssistantPage() {
                 msg.role === "user" ? "max-w-[80%]" : (pendingAction && msg.id === pendingAction.messageId ? "max-w-[90%]" : "max-w-[80%]")
               } rounded-2xl px-4 py-3 ${
                 msg.role === "user"
-                  ? "bg-gradient-to-br from-[#2DE2A0] to-[#24B882] text-[#0A0A0B] rounded-br-md shadow-[0_4px_12px_rgba(45,226,160,0.2)]"
-                  : "bg-[#161618] text-[#FAFAFA] rounded-bl-md border border-[#27272A]"
+                  ? "bg-gradient-to-br from-[#BC25F9] to-[#A020F0] text-[#0A0A0B] rounded-br-md shadow-[0_4px_12px_rgba(188,37,249,0.2)]"
+                  : "bg-[#111113] text-[#FAFAFA] rounded-bl-md border border-[#27272A]"
               }`}
             >
               {msg.role === "assistant" && pendingAction && msg.id === pendingAction.messageId
@@ -813,11 +813,11 @@ export default function AssistantPage() {
         {loading && (
           <div className="flex justify-start">
             <img src="/monica-icon.png" alt="Monica" className="w-8 h-8 rounded-full object-cover flex-shrink-0 mr-2 mt-1" />
-            <div className="bg-[#161618] rounded-2xl rounded-bl-md px-4 py-3 border border-[#27272A]">
+            <div className="bg-[#111113] rounded-2xl rounded-bl-md px-4 py-3 border border-[#27272A]">
               <div className="flex gap-1.5 py-1">
-                <div className="w-2 h-2 bg-[#2DE2A0] rounded-full animate-bounce [animation-delay:0ms]" />
-                <div className="w-2 h-2 bg-[#2DE2A0] rounded-full animate-bounce [animation-delay:150ms]" />
-                <div className="w-2 h-2 bg-[#2DE2A0] rounded-full animate-bounce [animation-delay:300ms]" />
+                <div className="w-2 h-2 bg-[#BC25F9] rounded-full animate-bounce [animation-delay:0ms]" />
+                <div className="w-2 h-2 bg-[#BC25F9] rounded-full animate-bounce [animation-delay:150ms]" />
+                <div className="w-2 h-2 bg-[#BC25F9] rounded-full animate-bounce [animation-delay:300ms]" />
               </div>
             </div>
           </div>
@@ -834,9 +834,9 @@ export default function AssistantPage() {
               <button
                 key={qa.label}
                 onClick={qa.action}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#161618] rounded-full border border-[#27272A] text-xs text-[#A1A1AA] hover:border-[#2DE2A0]/40 hover:text-[#2DE2A0] transition-all active:scale-[0.97]"
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#111113] rounded-full border border-[#27272A] text-xs text-[#A1A1AA] hover:border-[#BC25F9]/40 hover:text-[#BC25F9] transition-all active:scale-[0.97]"
               >
-                <span className="text-[#2DE2A0]">{qa.icon}</span>
+                <span className="text-[#BC25F9]">{qa.icon}</span>
                 {qa.label}
               </button>
             ))}
@@ -854,12 +854,12 @@ export default function AssistantPage() {
             onKeyDown={handleKeyDown}
             placeholder="Ask Monica anything..."
             rows={1}
-            className="flex-1 resize-none bg-[#161618] rounded-2xl px-4 py-3 text-sm text-[#FAFAFA] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#2DE2A0]/30 min-h-[44px] max-h-32 transition-shadow"
+            className="flex-1 resize-none bg-[#111113] rounded-2xl px-4 py-3 text-sm text-[#FAFAFA] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/30 min-h-[44px] max-h-32 transition-shadow"
             disabled={loading}
           />
           {/* Voice button (placeholder) */}
           <button
-            className="w-[44px] h-[44px] flex items-center justify-center bg-[#1C1C1F] text-[#71717A] rounded-2xl hover:bg-[#27272A] active:scale-[0.95] transition-all flex-shrink-0"
+            className="w-[44px] h-[44px] flex items-center justify-center bg-[#151517] text-[#71717A] rounded-2xl hover:bg-[#27272A] active:scale-[0.95] transition-all flex-shrink-0"
             aria-label="Voice input"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -872,7 +872,7 @@ export default function AssistantPage() {
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="w-[44px] h-[44px] flex items-center justify-center bg-[#2DE2A0] text-[#0A0A0B] rounded-2xl hover:bg-[#24B882] active:scale-[0.95] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 shadow-[0_4px_12px_rgba(45,226,160,0.3)]"
+            className="w-[44px] h-[44px] flex items-center justify-center bg-[#BC25F9] text-[#0A0A0B] rounded-2xl hover:bg-[#A020F0] active:scale-[0.95] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 shadow-[0_4px_12px_rgba(188,37,249,0.3)] shadow-[0_0_16px_rgba(188,37,249,0.35)]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />

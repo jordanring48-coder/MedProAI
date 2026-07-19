@@ -73,7 +73,7 @@ export default function HamburgerMenu() {
             {/* Drawer header */}
             <div className="p-6 pt-14 safe-top border-b border-[#27272A]">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#2DE2A0] to-[#24B882] rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#BC25F9] to-[#A020F0] rounded-full flex items-center justify-center">
                   <span className="text-xl font-bold text-[#0A0A0B]">
                     {(user?.name || user?.email || "U").charAt(0).toUpperCase()}
                   </span>
@@ -102,9 +102,9 @@ export default function HamburgerMenu() {
                     close();
                     setTimeout(() => navigate("/profile"), 300);
                   }}
-                  className="inline-flex items-center gap-1.5 bg-[#2DE2A0]/10 border border-[#2DE2A0]/30 px-3 py-1 rounded-full hover:bg-[#2DE2A0]/20 transition-colors"
+                  className="inline-flex items-center gap-1.5 bg-[#BC25F9]/10 border border-[#BC25F9]/30 px-3 py-1 rounded-full hover:bg-[#BC25F9]/20 transition-colors"
                 >
-                  <span className="text-xs font-semibold text-[#2DE2A0]">Upgrade to Premium</span>
+                  <span className="text-xs font-semibold text-[#BC25F9]">Upgrade to Premium</span>
                 </button>
               )}
             </div>
@@ -118,7 +118,7 @@ export default function HamburgerMenu() {
                       close();
                       setTimeout(() => navigate("/profile"), 300);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-[#FAFAFA] hover:bg-[#161618] transition-colors duration-200"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-[#FAFAFA] hover:bg-[#111113] transition-colors duration-200"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                       <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
@@ -132,7 +132,7 @@ export default function HamburgerMenu() {
                     close();
                     setTimeout(() => navigate("/profile"), 300);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-[#FAFAFA] hover:bg-[#161618] transition-colors duration-200"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-[#FAFAFA] hover:bg-[#111113] transition-colors duration-200"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#A1A1AA]">
                     <circle cx="12" cy="12" r="3" />
@@ -145,7 +145,7 @@ export default function HamburgerMenu() {
                   onClick={() => {
                     close();
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-[#FAFAFA] hover:bg-[#161618] transition-colors duration-200"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] text-[#FAFAFA] hover:bg-[#111113] transition-colors duration-200"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#A1A1AA]">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
@@ -169,7 +169,7 @@ export default function HamburgerMenu() {
                 </svg>
                 Log Out
               </button>
-              <p className="text-center text-[10px] text-[#3F3F46] mt-3">MedTrack AI v0.4.0</p>
+              <p className="text-center text-[10px] text-[#3F3F46] mt-3">Luna v0.4.0</p>
             </div>
           </div>
         </div>

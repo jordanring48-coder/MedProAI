@@ -99,11 +99,12 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#007AFF]/15 rounded-2xl mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#007AFF" className="w-8 h-8">
-              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z" />
-            </svg>
-          </div>
+          <img
+            src="/app-logo.png"
+            alt="Luna"
+            className="w-20 h-20 rounded-2xl mb-4"
+            style={{ boxShadow: "0 4px 24px rgba(188, 37, 249, 0.35)" }}
+          />
           <h1 className="text-2xl font-bold text-white mb-1">Reset Password</h1>
           <p className="text-gray-500 text-sm">
             {step === "email" && "Enter your email to receive a reset token"}
@@ -112,7 +113,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        <div className="bg-[#1C1C1E] rounded-2xl border border-[#2C2C2E] p-6">
+        <div className="bg-[#151517] rounded-2xl border border-[#27272A] p-6">
           {/* Error */}
           {error && (
             <div className="mb-4 p-3 bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-xl">
@@ -132,13 +133,13 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                  className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
                 />
               </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#007AFF] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#0066D6] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#BC25F9] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#A020F0] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_16px_rgba(188,37,249,0.35)]"
               >
                 {submitting ? "Sending..." : "Send Reset Token"}
               </button>
@@ -149,8 +150,8 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleResetSubmit} className="space-y-4">
               {/* Show the token for dev (since there's no email integration) */}
               {resetTokenInfo && (
-                <div className="p-3 bg-[#007AFF]/10 border border-[#007AFF]/20 rounded-xl mb-2">
-                  <p className="text-[#007AFF] text-xs font-medium mb-1">
+                <div className="p-3 bg-[#BC25F9]/10 border border-[#BC25F9]/20 rounded-xl mb-2">
+                  <p className="text-[#BC25F9] text-xs font-medium mb-1">
                     Development Mode — Reset Token:
                   </p>
                   <p className="text-white text-xs font-mono break-all select-all">
@@ -171,7 +172,7 @@ export default function ForgotPasswordPage() {
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   placeholder="Paste the reset token here"
-                  className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                  className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
                 />
               </div>
               <div>
@@ -184,7 +185,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                  className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
                 />
               </div>
               <div>
@@ -197,13 +198,13 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className="w-full bg-[#2C2C2E] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3A3A3C] focus:border-[#007AFF] focus:outline-none transition-colors"
+                  className="w-full bg-[#27272A] text-white rounded-xl px-4 py-3 text-sm placeholder-gray-600 border border-[#3F3F46] focus:border-[#BC25F9] focus:outline-none transition-colors"
                 />
               </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#007AFF] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#0066D6] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#BC25F9] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#A020F0] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_16px_rgba(188,37,249,0.35)]"
               >
                 {submitting ? "Resetting..." : "Reset Password"}
               </button>
@@ -223,7 +224,7 @@ export default function ForgotPasswordPage() {
               </p>
               <button
                 onClick={() => navigate("/auth")}
-                className="w-full bg-[#007AFF] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#0066D6] active:scale-[0.98] transition-all"
+                className="w-full bg-[#BC25F9] text-white font-semibold text-[15px] py-3 rounded-xl hover:bg-[#A020F0] active:scale-[0.98] transition-all shadow-[0_0_16px_rgba(188,37,249,0.35)]"
               >
                 Go to Login
               </button>
@@ -232,7 +233,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="mt-4 text-center">
-          <Link to="/auth" className="text-sm text-[#007AFF] hover:underline">
+          <Link to="/auth" className="text-sm text-[#BC25F9] hover:underline">
             ← Back to login
           </Link>
         </div>

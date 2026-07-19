@@ -2,11 +2,11 @@ import { useCallback } from "react";
 import { useAuth } from "../AuthContext";
 import type { PremiumState } from "../types";
 
-const ADMIN_SECRET = "medchron-admin";
+const ADMIN_SECRET = "luna-admin";
 
 function getMockPremium(): boolean {
   try {
-    return localStorage.getItem("medtrack_mock_premium") === "true";
+    return localStorage.getItem("luna_mock_premium") === "true";
   } catch {
     return false;
   }
