@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { AdherenceStats, Appointment, Medication } from "../types";
+import type { AdherenceStats, Allergy, Appointment, Medication, Provider } from "../types";
 import { getRefillStatus, getRefillLabel } from "../types";
 import {
   fetchAdherenceStats,
@@ -8,13 +8,21 @@ import {
   fetchRefillList,
   deleteAppointment,
   updateProfile,
+  fetchAllergies,
+  createAllergy,
+  deleteAllergy,
+  fetchProviders,
+  createProvider,
+  updateProvider,
+  deleteProvider,
 } from "../api";
 import { useAuth } from "../AuthContext";
+import { useTheme } from "../ThemeContext";
 import usePremium from "../hooks/usePremium";
 import AppointmentModal from "../components/AppointmentModal";
-import UserAvatar from "../components/UserAvatar";
+import UserAvatar, { AVATAR_GRADIENTS } from "../components/UserAvatar";
 
-const AVATAR_COLORS = ["#BC25F9", "#14B8A6", "#0EA5E9", "#8B5CF6", "#F43F5E", "#F59E0B"];
+const AVATAR_COLORS = ["purple", "pink", "violet", "coral", "teal", "amber"];
 
 const refillColors = {
   green: { dot: "bg-[#34D399]", bg: "bg-[#34D399]/10", text: "text-[#34D399]" },
@@ -36,7 +44,7 @@ function RingChart({ percentage, size = 80, strokeWidth = 8 }: { percentage: num
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#27272A"
+          stroke="var(--bg-tertiary)"
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -66,6 +74,7 @@ function RingChart({ percentage, size = 80, strokeWidth = 8 }: { percentage: num
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, logout, refreshUser, token } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { isPremium, upgradedAt } = usePremium();
   const [stats7, setStats7] = useState<AdherenceStats | null>(null);
   const [stats30, setStats30] = useState<AdherenceStats | null>(null);
@@ -75,6 +84,11 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [allergies, setAllergies] = useState<Allergy[]>([]);
+  const [newAllergyName, setNewAllergyName] = useState("");
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [showProviderForm, setShowProviderForm] = useState(false);
+  const [newProvider, setNewProvider] = useState({ name: "", phone: "", email: "", address: "", specialty: "" });
 
   const loadAll = async () => {
     try {
@@ -98,6 +112,26 @@ export default function ProfilePage() {
 
   useEffect(() => {
     loadAll();
+  }, []);
+
+  useEffect(() => {
+    const loadAllergies = async () => {
+      try {
+        const data = await fetchAllergies();
+        setAllergies(data.allergies);
+      } catch {}
+    };
+    loadAllergies();
+  }, []);
+
+  useEffect(() => {
+    const loadProviders = async () => {
+      try {
+        const data = await fetchProviders();
+        setProviders(data.providers);
+      } catch {}
+    };
+    loadProviders();
   }, []);
 
   const handleDeleteAppointment = async (id: number) => {
@@ -125,37 +159,77 @@ export default function ProfilePage() {
     }
   };
 
+  const handleAddAllergy = async () => {
+    const name = newAllergyName.trim();
+    if (!name) return;
+    try {
+      const allergy = await createAllergy(name);
+      setAllergies((prev) => [...prev, { id: allergy.id, name: allergy.name }]);
+      setNewAllergyName("");
+    } catch {}
+  };
+
+  const handleDeleteAllergy = async (id: number) => {
+    try {
+      await deleteAllergy(id);
+      setAllergies((prev) => prev.filter((a) => a.id !== id));
+    } catch {}
+  };
+
+  const handleCreateProvider = async () => {
+    const name = newProvider.name.trim();
+    if (!name) return;
+    try {
+      const provider = await createProvider(newProvider);
+      setProviders((prev) => [...prev, provider]);
+      setNewProvider({ name: "", phone: "", email: "", address: "", specialty: "" });
+      setShowProviderForm(false);
+    } catch {}
+  };
+
+  const handleDeleteProvider = async (id: number) => {
+    try {
+      await deleteProvider(id);
+      setProviders((prev) => prev.filter((p) => p.id !== id));
+    } catch {}
+  };
+
   // Urgent refills (red status)
   const urgentRefills = refills.filter((m) => getRefillStatus(m.refill_date) === "red");
   const upcomingRefills = refills.filter((m) => getRefillStatus(m.refill_date) === "orange");
 
   return (
-    <div className="pb-24 min-h-screen bg-[#0A0A0B]">
+    <div className="pb-24 min-h-screen bg-[var(--bg-primary)]">
       {/* Header */}
       <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-4 px-5">
         <div className="absolute right-5 top-3">
           <UserAvatar />
         </div>
-        <h1 className="text-3xl font-bold text-[#FAFAFA] mb-1">Profile</h1>
-        <p className="text-[15px] text-[#A1A1AA]">Your health stats & settings</p>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-1">Profile</h1>
+        <p className="text-[15px] text-[var(--text-secondary)]">Your health stats & settings</p>
       </div>
 
       <div className="px-5">
       {/* Avatar Color */}
-      <div className="bg-[#111113] rounded-2xl border border-[#27272A] p-5 mb-4">
-        <p className="text-sm font-semibold text-[#FAFAFA] mb-3">Avatar Color</p>
+      <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 p-5 mb-4">
+        <p className="text-sm font-semibold text-[var(--text-primary)] mb-3">Avatar Color</p>
         <div className="flex gap-3">
-          {AVATAR_COLORS.map((color) => {
-            const isSelected = (user?.avatarColor || "#BC25F9") === color;
+          {AVATAR_COLORS.map((colorName) => {
+            const selectedColor = user?.avatarColor || "purple";
+            const isSelected = selectedColor === colorName;
+            const grad = AVATAR_GRADIENTS[colorName] || AVATAR_GRADIENTS.purple;
             return (
               <button
-                key={color}
-                onClick={() => handleAvatarColor(color)}
-                className={`w-8 h-8 rounded-full transition-all duration-200 active:scale-95 ${
+                key={colorName}
+                onClick={() => handleAvatarColor(colorName)}
+                className={`w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
                   isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-[#111113]" : ""
                 }`}
-                style={{ backgroundColor: color }}
-                aria-label={`Avatar color ${color}`}
+                style={{
+                  background: `linear-gradient(135deg, ${grad.from}, ${grad.to})`,
+                  ...(isSelected ? { boxShadow: `0 0 10px 2px ${grad.glow}` } : {}),
+                }}
+                aria-label={`Avatar color ${colorName}`}
               />
             );
           })}
@@ -164,12 +238,12 @@ export default function ProfilePage() {
 
       {/* User info + Logout */}
       {user && (
-        <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-4 mb-4 flex items-center justify-between">
+        <div className="bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-[#BC25F9]/25 p-4 mb-4 flex items-center justify-between">
           <div>
-            <p className="text-[15px] font-semibold text-[#FAFAFA]">
+            <p className="text-[15px] font-semibold text-[var(--text-primary)]">
               {user.name || user.email}
             </p>
-            <p className="text-sm text-[#A1A1AA]">{user.email}</p>
+            <p className="text-sm text-[var(--text-secondary)]">{user.email}</p>
           </div>
           <button
             onClick={() => { logout(); navigate("/auth"); }}
@@ -180,14 +254,175 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Theme Toggle */}
+      <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 p-5 mb-4">
+        <p className="text-sm font-semibold text-[var(--text-primary)] mb-3">Theme</p>
+        <div className="flex gap-3">
+          <button
+            onClick={toggleTheme}
+            className={`px-4 py-2 rounded-xl font-medium text-sm transition-all active:scale-95 ${
+              theme === "light"
+                ? "bg-[#BC25F9] text-white"
+                : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"
+            }`}
+          >
+            ☀️ Light
+          </button>
+          <button
+            onClick={toggleTheme}
+            className={`px-4 py-2 rounded-xl font-medium text-sm transition-all active:scale-95 ${
+              theme === "dark"
+                ? "bg-[#BC25F9] text-white"
+                : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"
+            }`}
+          >
+            🌙 Dark
+          </button>
+        </div>
+      </div>
+
+      {/* Allergies */}
+      <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 p-6 mb-4">
+        <div className="flex items-center gap-2 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#F87171" className="w-5 h-5">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg>
+          <h2 className="text-[17px] font-semibold text-[var(--text-primary)]">Allergies</h2>
+        </div>
+        {allergies.length === 0 ? (
+          <p className="text-sm text-[var(--text-secondary)] text-center py-2">No allergies recorded</p>
+        ) : (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {allergies.map((a) => (
+              <span key={a.id} className="inline-flex items-center gap-1.5 bg-[#BC25F9]/10 text-[#BC25F9] rounded-full px-3 py-1 text-sm">
+                {a.name}
+                <button onClick={() => handleDeleteAllergy(a.id)} className="p-1 hover:text-[#F87171] transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                  </svg>
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newAllergyName}
+            onChange={(e) => setNewAllergyName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleAddAllergy(); }}
+            placeholder="e.g. Penicillin"
+            className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9]"
+          />
+          <button
+            onClick={handleAddAllergy}
+            disabled={!newAllergyName.trim()}
+            className="bg-[#BC25F9] text-white font-medium text-sm px-4 py-2.5 rounded-xl hover:bg-[#A020F0] active:scale-[0.97] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      {/* Providers */}
+      <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 p-6 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0EA5E9" className="w-5 h-5">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <h2 className="text-[17px] font-semibold text-[var(--text-primary)]">My Providers</h2>
+          </div>
+          <button
+            onClick={() => setShowProviderForm(!showProviderForm)}
+            className="text-[#BC25F9] font-medium text-sm hover:underline"
+          >
+            {showProviderForm ? "Cancel" : "+ Add"}
+          </button>
+        </div>
+
+        {providers.length === 0 && !showProviderForm ? (
+          <p className="text-sm text-[var(--text-secondary)] text-center py-2">No providers added yet</p>
+        ) : (
+          <div className="space-y-3 mb-4">
+            {providers.map((p) => (
+              <div key={p.id} className="bg-[var(--bg-primary)] rounded-xl p-4 relative">
+                <button
+                  onClick={() => handleDeleteProvider(p.id)}
+                  className="absolute top-2 right-2 p-1.5 text-[var(--text-secondary)] hover:text-[#F87171] transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                  </svg>
+                </button>
+                <p className="text-[15px] font-semibold text-[var(--text-primary)] pr-6">{p.name}</p>
+                {p.specialty && <p className="text-sm text-[#BC25F9] mt-0.5">{p.specialty}</p>}
+                {p.phone && <p className="text-sm text-[var(--text-secondary)] mt-1">{p.phone}</p>}
+                {p.email && <p className="text-sm text-[var(--text-secondary)]">{p.email}</p>}
+                {p.address && <p className="text-sm text-[var(--text-secondary)]">{p.address}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {showProviderForm && (
+          <div className="bg-[var(--bg-primary)] rounded-xl p-4 space-y-3">
+            <input
+              type="text"
+              value={newProvider.name}
+              onChange={(e) => setNewProvider((prev) => ({ ...prev, name: e.target.value }))}
+              placeholder="Provider name *"
+              className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9]"
+            />
+            <input
+              type="text"
+              value={newProvider.specialty}
+              onChange={(e) => setNewProvider((prev) => ({ ...prev, specialty: e.target.value }))}
+              placeholder="Specialty"
+              className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9]"
+            />
+            <div className="flex gap-2">
+              <input
+                type="tel"
+                value={newProvider.phone}
+                onChange={(e) => setNewProvider((prev) => ({ ...prev, phone: e.target.value }))}
+                placeholder="Phone"
+                className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9]"
+              />
+              <input
+                type="email"
+                value={newProvider.email}
+                onChange={(e) => setNewProvider((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="Email"
+                className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9]"
+              />
+            </div>
+            <input
+              type="text"
+              value={newProvider.address}
+              onChange={(e) => setNewProvider((prev) => ({ ...prev, address: e.target.value }))}
+              placeholder="Address"
+              className="w-full px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9]"
+            />
+            <button
+              onClick={handleCreateProvider}
+              disabled={!newProvider.name.trim()}
+              className="w-full bg-[#BC25F9] text-white font-medium text-sm py-2.5 rounded-xl hover:bg-[#A020F0] active:scale-[0.97] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Save Provider
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Loading */}
       {loading && (
         <div className="space-y-4">
-          <div className="bg-[#111113] rounded-2xl p-6 shadow-sm animate-pulse">
-            <div className="h-4 bg-[#27272A] rounded w-32 mb-4" />
+          <div className="bg-[var(--bg-secondary)] rounded-2xl p-6 shadow-sm animate-pulse">
+            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-32 mb-4" />
             <div className="flex gap-6 justify-center">
-              <div className="w-20 h-20 bg-[#27272A] rounded-full" />
-              <div className="w-20 h-20 bg-[#27272A] rounded-full" />
+              <div className="w-20 h-20 bg-[var(--bg-tertiary)] rounded-full" />
+              <div className="w-20 h-20 bg-[var(--bg-tertiary)] rounded-full" />
             </div>
           </div>
         </div>
@@ -195,7 +430,7 @@ export default function ProfilePage() {
 
       {/* Error */}
       {!loading && error && (
-        <div className="bg-[#111113] rounded-2xl p-8 shadow-sm text-center">
+        <div className="bg-[var(--bg-secondary)] rounded-2xl p-8 shadow-sm text-center">
           <p className="text-[#F87171] font-medium mb-4">{error}</p>
           <button onClick={loadAll} className="text-[#BC25F9] font-medium hover:underline">
             Try Again
@@ -206,11 +441,11 @@ export default function ProfilePage() {
       {!loading && !error && stats7 && stats30 && (
         <>
           {/* ── Premium Status Card ── */}
-          <div className={`rounded-2xl border p-6 mb-4 ${isPremium ? "bg-gradient-to-br from-[#FBBF24]/10 to-[#FBBF24]/5 border-[#FBBF24]/30" : "bg-[#111113] border-[#27272A]"}`}>
+          <div className={`rounded-2xl border p-6 mb-4 ${isPremium ? "bg-gradient-to-br from-[#FBBF24]/10 to-[#FBBF24]/5 border-[#FBBF24]/30" : "bg-[var(--bg-secondary)] border-[#BC25F9]/25"}`}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-[#FAFAFA]">
+                  <h3 className="font-semibold text-[var(--text-primary)]">
                     {isPremium ? "Luna Premium" : "Luna Free"}
                   </h3>
                   {isPremium && (
@@ -222,7 +457,7 @@ export default function ProfilePage() {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-[#A1A1AA] mt-0.5">
+                <p className="text-sm text-[var(--text-secondary)] mt-0.5">
                   {isPremium
                     ? `Active since ${new Date(upgradedAt).toLocaleDateString()}`
                     : "Upgrade for AI-powered insights, unlimited medications, and more"}
@@ -245,12 +480,12 @@ export default function ProfilePage() {
 
           {/* ── Refill Summary (premium) ── */}
           {isPremium && refills.length > 0 && (
-            <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
+            <div className="bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-[#BC25F9]/25 p-6 mb-4">
               <div className="flex items-center gap-2 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#BC25F9" className="w-5 h-5">
                   <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
                 </svg>
-                <h2 className="text-[17px] font-semibold text-[#FAFAFA]">Refill Summary</h2>
+                <h2 className="text-[17px] font-semibold text-[var(--text-primary)]">Refill Summary</h2>
               </div>
 
               {urgentRefills.length > 0 && (
@@ -264,7 +499,7 @@ export default function ProfilePage() {
                       <div key={m.id} className={`${colors.bg} rounded-xl p-3 mb-2 flex items-center gap-3`}>
                         <div className={`w-2.5 h-2.5 ${colors.dot} rounded-full flex-shrink-0`} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[#FAFAFA] truncate">{m.name}</p>
+                          <p className="text-sm font-medium text-[var(--text-primary)] truncate">{m.name}</p>
                           <p className={`text-xs ${colors.text}`}>{getRefillLabel(m.refill_date)}</p>
                         </div>
                       </div>
@@ -284,7 +519,7 @@ export default function ProfilePage() {
                       <div key={m.id} className={`${colors.bg} rounded-xl p-3 mb-2 flex items-center gap-3`}>
                         <div className={`w-2.5 h-2.5 ${colors.dot} rounded-full flex-shrink-0`} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-[#FAFAFA] truncate">{m.name}</p>
+                          <p className="text-sm font-medium text-[var(--text-primary)] truncate">{m.name}</p>
                           <p className={`text-xs ${colors.text}`}>{getRefillLabel(m.refill_date)}</p>
                         </div>
                       </div>
@@ -294,20 +529,20 @@ export default function ProfilePage() {
               )}
 
               {urgentRefills.length === 0 && upcomingRefills.length === 0 && (
-                <p className="text-sm text-[#71717A] text-center py-2">All refills are up to date</p>
+                <p className="text-sm text-[var(--text-secondary)] text-center py-2">All refills are up to date</p>
               )}
             </div>
           )}
 
           {/* ── Appointments Section (premium) ── */}
           {isPremium && (
-            <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
+            <div className="bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-[#BC25F9]/25 p-6 mb-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#34D399" className="w-5 h-5">
                     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z" />
                   </svg>
-                  <h2 className="text-[17px] font-semibold text-[#FAFAFA]">Appointments</h2>
+                  <h2 className="text-[17px] font-semibold text-[var(--text-primary)]">Appointments</h2>
                 </div>
                 <button
                   onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
@@ -318,46 +553,46 @@ export default function ProfilePage() {
               </div>
 
               {appointments.length === 0 ? (
-                <p className="text-sm text-[#71717A] text-center py-4">
+                <p className="text-sm text-[var(--text-secondary)] text-center py-4">
                   No upcoming appointments. Tap "+ Add" to schedule one.
                 </p>
               ) : (
                 <div className="space-y-3">
                   {appointments.map((a) => (
-                    <div key={a.id} className="bg-[#0A0A0B] rounded-xl p-4 flex items-start gap-3">
+                    <div key={a.id} className="bg-[var(--bg-primary)] rounded-xl p-4 flex items-start gap-3">
                       <div className="w-10 h-10 bg-[#34D399]/10 rounded-xl flex items-center justify-center flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#34D399" className="w-5 h-5">
                           <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z" />
                         </svg>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[15px] font-semibold text-[#FAFAFA]">{a.title}</p>
+                        <p className="text-[15px] font-semibold text-[var(--text-primary)]">{a.title}</p>
                         {a.doctor_name && (
-                          <p className="text-sm text-[#A1A1AA] mt-0.5">{a.doctor_name}</p>
+                          <p className="text-sm text-[var(--text-secondary)] mt-0.5">{a.doctor_name}</p>
                         )}
-                        <div className="flex items-center gap-3 mt-1.5 text-xs text-[#71717A]">
+                        <div className="flex items-center gap-3 mt-1.5 text-xs text-[var(--text-secondary)]">
                           <span>{new Date(a.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                           {a.time && <span>{a.time}</span>}
                           {a.location && <span>{a.location}</span>}
                         </div>
                         {a.notes && (
-                          <p className="text-xs text-[#71717A] mt-1.5 italic">{a.notes}</p>
+                          <p className="text-xs text-[var(--text-secondary)] mt-1.5 italic">{a.notes}</p>
                         )}
                       </div>
-                      <div className="flex gap-1 flex-shrink-0">
+                      <div className="flex gap-2 flex-shrink-0">
                         <button
                           onClick={() => { setEditingAppointment(a); setShowAppointmentModal(true); }}
-                          className="text-[#71717A] hover:text-[#BC25F9] p-1"
+                          className="text-[var(--text-secondary)] hover:text-[#BC25F9] p-2"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                           </svg>
                         </button>
                         <button
                           onClick={() => handleDeleteAppointment(a.id)}
-                          className="text-[#71717A] hover:text-[#F87171] p-1"
+                          className="text-[var(--text-secondary)] hover:text-[#F87171] p-2"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                           </svg>
                         </button>
@@ -370,22 +605,22 @@ export default function ProfilePage() {
           )}
 
           {/* Adherence rings */}
-          <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] p-6 mb-4">
-            <h2 className="text-[17px] font-semibold text-[#FAFAFA] mb-5 text-center">
+          <div className="bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-[#BC25F9]/25 p-6 mb-4">
+            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] mb-5 text-center">
               Adherence Rate
             </h2>
             <div className="flex justify-center gap-10">
               <div className="flex flex-col items-center gap-2">
                 <RingChart percentage={stats7.adherence} />
-                <span className="text-sm text-[#A1A1AA] font-medium">7 days</span>
-                <span className="text-xs text-[#71717A]">
+                <span className="text-sm text-[var(--text-secondary)] font-medium">7 days</span>
+                <span className="text-xs text-[var(--text-secondary)]">
                   {stats7.taken}/{stats7.taken + stats7.missed} doses
                 </span>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <RingChart percentage={stats30.adherence} size={90} strokeWidth={9} />
-                <span className="text-sm text-[#A1A1AA] font-medium">30 days</span>
-                <span className="text-xs text-[#71717A]">
+                <span className="text-sm text-[var(--text-secondary)] font-medium">30 days</span>
+                <span className="text-xs text-[var(--text-secondary)]">
                   {stats30.taken}/{stats30.taken + stats30.missed} doses
                 </span>
               </div>
@@ -393,8 +628,8 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats summary */}
-          <div className="bg-[#111113] rounded-2xl shadow-sm border border-[#27272A] overflow-hidden mb-4">
-            <div className="divide-y divide-[#27272A]">
+          <div className="bg-[var(--bg-secondary)] rounded-2xl shadow-sm border border-[#BC25F9]/25 overflow-hidden mb-4">
+            <div className="divide-y divide-[var(--bg-tertiary)]">
               <div className="px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-[#BC25F9]/10 rounded-lg flex items-center justify-center">
@@ -402,9 +637,9 @@ export default function ProfilePage() {
                       <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
                     </svg>
                   </div>
-                  <span className="text-[#FAFAFA]">Total Medications</span>
+                  <span className="text-[var(--text-primary)]">Total Medications</span>
                 </div>
-                <span className="text-[17px] font-semibold text-[#FAFAFA]">{stats30.totalMedications}</span>
+                <span className="text-[17px] font-semibold text-[var(--text-primary)]">{stats30.totalMedications}</span>
               </div>
 
               <div className="px-6 py-4 flex justify-between items-center">
@@ -414,7 +649,7 @@ export default function ProfilePage() {
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                     </svg>
                   </div>
-                  <span className="text-[#FAFAFA]">Taken (30d)</span>
+                  <span className="text-[var(--text-primary)]">Taken (30d)</span>
                 </div>
                 <span className="text-[17px] font-semibold text-[#34D399]">{stats30.taken}</span>
               </div>
@@ -426,31 +661,31 @@ export default function ProfilePage() {
                       <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
                     </svg>
                   </div>
-                  <span className="text-[#FAFAFA]">Missed (30d)</span>
+                  <span className="text-[var(--text-primary)]">Missed (30d)</span>
                 </div>
                 <span className="text-[17px] font-semibold text-[#F87171]">{stats30.missed}</span>
               </div>
 
               <div className="px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#27272A] rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[var(--bg-tertiary)] rounded-lg flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#71717A" className="w-4 h-4">
                       <path d="M6 6h12v12H6V6zm2 2v8h2v-4l2 4h2V8h-2v4l-2-4H8z" />
                     </svg>
                   </div>
-                  <span className="text-[#FAFAFA]">Skipped (30d)</span>
+                  <span className="text-[var(--text-primary)]">Skipped (30d)</span>
                 </div>
-                <span className="text-[17px] font-semibold text-[#71717A]">{stats30.skipped}</span>
+                <span className="text-[17px] font-semibold text-[var(--text-secondary)]">{stats30.skipped}</span>
               </div>
 
               <div className="px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#27272A] rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-[var(--bg-tertiary)] rounded-lg flex items-center justify-center">
                     <div className="w-2 h-2 bg-[#71717A] rounded-full" />
                   </div>
-                  <span className="text-[#FAFAFA]">Pending (30d)</span>
+                  <span className="text-[var(--text-primary)]">Pending (30d)</span>
                 </div>
-                <span className="text-[17px] font-semibold text-[#A1A1AA]">{stats30.pending}</span>
+                <span className="text-[17px] font-semibold text-[var(--text-secondary)]">{stats30.pending}</span>
               </div>
             </div>
           </div>
@@ -469,7 +704,7 @@ export default function ProfilePage() {
         />
       )}
 
-      <p className="text-center text-xs text-[#71717A] mt-8">Luna v0.3.0</p>
+      <p className="text-center text-xs text-[var(--text-secondary)] mt-8">Luna v0.3.0</p>
     </div>
   );
 }
