@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { Medication, Dose, AdherenceStats, Appointment } from "../types";
 import { fetchMedications, fetchTodayDoses, fetchAdherenceStats, fetchUpcomingAppointments } from "../api";
 import { useAuth } from "../AuthContext";
+import { useTheme } from "../ThemeContext";
 import usePremium from "../hooks/usePremium";
 import LogSymptomModal from "../components/LogSymptomModal";
 import AddEditMedicationModal from "../components/AddEditMedicationModal";
@@ -57,7 +58,7 @@ function MintRing({ percentage, size = 100, strokeWidth = 8, celebrating = false
           style={{ filter: celebrating ? "drop-shadow(0 0 10px rgba(188,37,249,0.6))" : "drop-shadow(0 0 12px rgba(188,37,249,0.4))" }}
         />
       </svg>
-      <span className="absolute text-2xl font-bold text-[#FAFAFA]">
+      <span className="absolute text-2xl font-bold text-[var(--text-primary)]">
         {percentage}%
       </span>
     </div>
@@ -115,6 +116,7 @@ function localToday(): string {
 export default function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { theme } = useTheme();
   const { isPremium } = usePremium();
   const [meds, setMeds] = useState<Medication[]>([]);
   const [todayDoses, setTodayDoses] = useState<Dose[]>([]);
@@ -228,13 +230,13 @@ export default function HomePage() {
           <UserAvatar />
         </div>
         <div className="flex justify-center mb-4">
-          <img src="/luna-header.png" alt="Luna" className="h-28 object-contain" />
+          <img src={theme === "light" ? "/luna-header-light.png" : "/luna-header.png"} alt="Luna" className="h-28 object-contain" />
         </div>
         <div className="flex items-center gap-2 mb-1">
           {getTimeIcon()}
           <span className="text-[17px] font-medium text-[var(--text-secondary)]">{getGreeting()},</span>
         </div>
-        <h2 className="text-4xl font-bold text-[#FAFAFA] tracking-tight">{name}</h2>
+        <h2 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight">{name}</h2>
         <p className="text-sm text-[#71717A] mt-1">{subtitle}</p>
       </div>
 
@@ -265,7 +267,7 @@ export default function HomePage() {
             <div className="flex items-center gap-5">
               <MintRing percentage={adherencePct} size={90} strokeWidth={7} celebrating={celebrating} />
               <div className="flex-1">
-                <h3 className="text-[17px] font-semibold text-[#FAFAFA] mb-1">
+                <h3 className="text-[17px] font-semibold text-[var(--text-primary)] mb-1">
                   Today's Medications
                 </h3>
                 <p className="text-[15px] text-[var(--text-secondary)]">
@@ -300,7 +302,7 @@ export default function HomePage() {
                   <span className="text-2xl">🔥</span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-[17px] font-bold text-[#FAFAFA]">
+                  <h3 className="text-[17px] font-bold text-[var(--text-primary)]">
                     {streakCount}-Day Streak!
                   </h3>
                   <p className="text-[15px] text-[var(--text-secondary)] mt-0.5">
@@ -326,7 +328,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="text-[17px] font-semibold text-[#FAFAFA]">Adherence (7d)</h3>
+                <h3 className="text-[17px] font-semibold text-[var(--text-primary)]">Adherence (7d)</h3>
                 <p className="text-[15px] text-[var(--text-secondary)] mt-0.5">
                   {adherence7d === -1
                     ? "No data yet"
@@ -361,7 +363,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-medium text-[#FAFAFA]">Next Dose</p>
+                <p className="text-[15px] font-medium text-[var(--text-primary)]">Next Dose</p>
                 <p className="text-sm text-[var(--text-secondary)] truncate">
                   {nextDose
                     ? `${nextDose.medication_name || "Medication"} at ${nextDose.scheduled_time}`
@@ -387,7 +389,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-medium text-[#FAFAFA]">Next Appointment</p>
+                <p className="text-[15px] font-medium text-[var(--text-primary)]">Next Appointment</p>
                 <p className="text-sm text-[var(--text-secondary)] truncate">
                   {isPremium
                     ? nextAppt
@@ -449,7 +451,7 @@ export default function HomePage() {
           {meds.length > 0 && (
             <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[#BC25F9]/25 p-5 mb-4 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[17px] font-semibold text-[#FAFAFA]">Your Medications</h3>
+                <h3 className="text-[17px] font-semibold text-[var(--text-primary)]">Your Medications</h3>
                 <button
                   onClick={() => navigate("/tracker")}
                   className="text-sm font-medium text-[#BC25F9] hover:underline"
@@ -464,7 +466,7 @@ export default function HomePage() {
                     className="flex items-center gap-3 py-2"
                   >
                     <div className="w-2 h-2 bg-[#BC25F9] rounded-full flex-shrink-0" />
-                    <span className="text-[15px] text-[#FAFAFA] truncate flex-1">{med.name}</span>
+                    <span className="text-[15px] text-[var(--text-primary)] truncate flex-1">{med.name}</span>
                     {med.dosage && (
                       <span className="text-sm text-[#71717A]">{med.dosage}</span>
                     )}
