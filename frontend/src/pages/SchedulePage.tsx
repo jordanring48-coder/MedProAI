@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import type { Dose, Appointment } from "../types";
-import { fetchDoseHistory, fetchUpcomingAppointments } from "../api";
+import { fetchDoseHistory, fetchUpcomingAppointments, confirmDose, updateDose } from "../api";
 import usePremium from "../hooks/usePremium";
 import UserAvatar from "../components/UserAvatar";
+import DoseConfirmPopup from "../components/DoseConfirmPopup";
 
 function localDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -44,6 +45,41 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const stripRef = useRef<HTMLDivElement>(null);
 
+  const loadData = async () => {
+    try {
+      const from = localDateStr(new Date(Date.now() - 7 * 86400000));
+      const to = localDateStr(new Date(Date.now() + 14 * 86400000));
+      const doses = await fetchDoseHistory(
+        new Date(from + "T00:00:00Z").toISOString(),
+        new Date(to + "T23:59:59Z").toISOString()
+      );
+
+      const grouped: Record<string, Dose[]> = {};
+      for (const dose of doses) {
+        const date = dose.scheduled_date || localDateStr(new Date(dose.created_at));
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(dose);
+      }
+      for (const key of Object.keys(grouped)) {
+        grouped[key].sort((a, b) => a.scheduled_time.localeCompare(b.scheduled_time));
+      }
+
+      setDosesByDate(grouped);
+    } catch {}
+
+    if (isPremium) {
+      try {
+        const appts = await fetchUpcomingAppointments();
+        setAppointments(appts);
+      } catch {}
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [isPremium]);
+
   // Generate 7-day date strip: 3 before today, today, 3 after
   const dateStrip = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -63,40 +99,6 @@ export default function SchedulePage() {
       pill.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }
   }, [selectedDate]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const from = localDateStr(new Date(Date.now() - 7 * 86400000));
-        const to = localDateStr(new Date(Date.now() + 14 * 86400000));
-        const doses = await fetchDoseHistory(
-          new Date(from + "T00:00:00Z").toISOString(),
-          new Date(to + "T23:59:59Z").toISOString()
-        );
-
-        const grouped: Record<string, Dose[]> = {};
-        for (const dose of doses) {
-          const date = dose.scheduled_date || localDateStr(new Date(dose.created_at));
-          if (!grouped[date]) grouped[date] = [];
-          grouped[date].push(dose);
-        }
-        for (const key of Object.keys(grouped)) {
-          grouped[key].sort((a, b) => a.scheduled_time.localeCompare(b.scheduled_time));
-        }
-
-        setDosesByDate(grouped);
-      } catch {}
-
-      if (isPremium) {
-        try {
-          const appts = await fetchUpcomingAppointments();
-          setAppointments(appts);
-        } catch {}
-      }
-      setLoading(false);
-    };
-    load();
-  }, [isPremium]);
 
   // Build time-of-day buckets for the selected date
   const dosesForDate = dosesByDate[selectedDate] || [];
@@ -132,7 +134,7 @@ export default function SchedulePage() {
   const dateIsPast = isPast(selectedDate);
 
   return (
-    <div className="pb-24 min-h-screen">
+    <div className="pb-28 min-h-screen">
       {/* Header */}
       <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-4 px-5">
         <div className="absolute right-5 top-3">
@@ -147,9 +149,9 @@ export default function SchedulePage() {
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-[#FAFAFA] tracking-tight">Schedule</h1>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">Schedule</h1>
         </div>
-        <p className="text-[15px] text-[#71717A] mt-1.5 ml-[42px]">Your dose schedule & appointments</p>
+        <p className="text-[15px] text-[var(--text-secondary)] mt-1.5 ml-[42px]">Your dose schedule & appointments</p>
       </div>
 
       <div className="px-5">
@@ -173,13 +175,13 @@ export default function SchedulePage() {
               " bg-[#BC25F9] text-[#0A0A0B] font-bold shadow-[0_0_12px_rgba(188,37,249,0.3)]";
           } else if (isSel) {
             // Selected but not today: mint border
-            pillClasses += " border-2 border-[#BC25F9] text-[#FAFAFA]";
+            pillClasses += " border-2 border-[#BC25F9] text-[var(--text-primary)]";
           } else if (isTodayDate) {
             // Today but not selected: subtle highlight
             pillClasses += " text-[#BC25F9] font-semibold";
           } else {
             // Other days
-            pillClasses += " text-[#71717A]";
+            pillClasses += " text-[var(--text-secondary)]";
           }
 
           return (
@@ -202,7 +204,7 @@ export default function SchedulePage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-[#111113] rounded-3xl p-5 border border-[#27272A] animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+              className="bg-[#111113] rounded-3xl p-5 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]"
             >
               <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
               <div className="space-y-2">
@@ -218,7 +220,7 @@ export default function SchedulePage() {
       {!loading && (
         <div className="space-y-4">
           {visibleBuckets.length === 0 ? (
-            <div className="bg-[#111113] rounded-3xl p-8 border border-[#27272A] text-center shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+            <div className="bg-[#111113] rounded-3xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="w-16 h-16 bg-[#BC25F9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -234,8 +236,8 @@ export default function SchedulePage() {
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-[#FAFAFA] mb-1">Nothing scheduled</h3>
-              <p className="text-sm text-[#A1A1AA]">
+              <h3 className="font-semibold text-[var(--text-primary)] mb-1">Nothing scheduled</h3>
+              <p className="text-sm text-[var(--text-secondary)]">
                 No doses or appointments for{" "}
                 {isToday(selectedDate) ? "today" : "this day"}.
               </p>
@@ -244,11 +246,11 @@ export default function SchedulePage() {
             visibleBuckets.map((bucket) => (
               <div
                 key={bucket.label}
-                className="bg-[#111113] rounded-3xl border border-[#27272A] overflow-hidden transition-opacity duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                className="bg-[#111113] rounded-3xl border border-[#BC25F9]/25 overflow-hidden transition-opacity duration-300 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
               >
                 {/* Time-of-day header */}
                 <div className="px-5 py-2.5 bg-[#151517]/60">
-                  <span className="text-[#71717A] text-xs font-semibold uppercase tracking-wider">
+                  <span className="text-[var(--text-secondary)] text-xs font-semibold uppercase tracking-wider">
                     {bucket.label}
                   </span>
                 </div>
@@ -257,7 +259,7 @@ export default function SchedulePage() {
                 <div className="divide-y divide-[#27272A]">
                   {bucket.items.map((item, idx) => {
                     if (item.kind === "dose") {
-                      return <DoseRow key={`dose-${item.dose.id}`} dose={item.dose} />;
+                      return <DoseRow key={`dose-${item.dose.id}`} dose={item.dose} onDoseUpdate={loadData} />;
                     } else {
                       return (
                         <AppointmentRow
@@ -281,7 +283,11 @@ export default function SchedulePage() {
 
 /* ── Dose Row ── */
 
-function DoseRow({ dose }: { dose: Dose }) {
+function DoseRow({ dose, onDoseUpdate }: { dose: Dose; onDoseUpdate: () => void }) {
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const rowRef = useRef<HTMLDivElement>(null);
+
   const status = dose.status;
   const isPastPending =
     status === "pending" && dose.scheduled_time < new Date().toTimeString().slice(0, 5);
@@ -296,34 +302,87 @@ function DoseRow({ dose }: { dose: Dose }) {
 
   const dotClass = dotStyle[effectiveStatus] || dotStyle.pending;
 
+  const handleRowClick = (e: React.MouseEvent) => {
+    if (effectiveStatus !== "pending") return;
+    // Only show popup for pending doses
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    // Position popup relative to the viewport, then we'll use fixed positioning
+    setPopupPosition({
+      top: rect.bottom + 4,
+      left: Math.max(8, rect.left - 20),
+    });
+    setShowPopup(true);
+  };
+
+  const handleConfirm = async () => {
+    setShowPopup(false);
+    try {
+      await confirmDose(dose.id);
+    } catch {
+      // Fallback to simple update
+      await updateDose(dose.id, "taken");
+    }
+    onDoseUpdate();
+  };
+
+  const handleSkip = async () => {
+    setShowPopup(false);
+    try {
+      await updateDose(dose.id, "skipped");
+    } catch {
+      // silently fail
+    }
+    onDoseUpdate();
+  };
+
+  const handleCancel = () => {
+    setShowPopup(false);
+  };
+
   return (
-    <div className="px-5 py-3.5 flex items-center gap-3">
-      {/* Status dot */}
-      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${dotClass}`} />
-
-      {/* Time */}
-      <span className="text-sm font-medium text-[#FAFAFA] w-14 flex-shrink-0 tabular-nums">
-        {dose.scheduled_time}
-      </span>
-
-      {/* Pill icon */}
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={effectiveStatus === "taken" ? "#BC25F9" : effectiveStatus === "missed" ? "#F87171" : effectiveStatus === "skipped" ? "#52525B" : "#A1A1AA"}
-        strokeWidth="2"
-        className="w-4 h-4 flex-shrink-0"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+    <div ref={rowRef} className="relative">
+      <div
+        className={`px-5 py-3.5 flex items-center gap-3 ${effectiveStatus === "pending" ? "cursor-pointer active:bg-[#151517]/60" : ""}`}
+        onClick={handleRowClick}
       >
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
-        <path d="M7 12h10" />
-      </svg>
+        {/* Status dot */}
+        <div className={`w-3 h-3 rounded-full flex-shrink-0 ${dotClass}`} />
 
-      {/* Med name */}
-      <span className="text-[15px] text-[#FAFAFA] flex-1 truncate">
-        {dose.medication_name || `Medication #${dose.medication_id}`}
-      </span>
+        {/* Time */}
+        <span className="text-sm font-medium text-[var(--text-primary)] w-14 flex-shrink-0 tabular-nums">
+          {dose.scheduled_time}
+        </span>
+
+        {/* Pill icon */}
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={effectiveStatus === "taken" ? "#BC25F9" : effectiveStatus === "missed" ? "#F87171" : effectiveStatus === "skipped" ? "#52525B" : "#A1A1AA"}
+          strokeWidth="2"
+          className="w-4 h-4 flex-shrink-0"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+          <path d="M7 12h10" />
+        </svg>
+
+        {/* Med name */}
+        <span className="text-[15px] text-[var(--text-primary)] flex-1 truncate">
+          {dose.medication_name || `Medication #${dose.medication_id}`}
+        </span>
+      </div>
+
+      {/* Inline popup */}
+      {showPopup && (
+        <DoseConfirmPopup
+          dose={dose}
+          onConfirm={handleConfirm}
+          onSkip={handleSkip}
+          onCancel={handleCancel}
+          position={popupPosition}
+        />
+      )}
     </div>
   );
 }
@@ -345,7 +404,7 @@ function AppointmentRow({
       <div className="w-3 h-3 rounded-full flex-shrink-0 bg-[#BC25F9]" />
 
       {/* Time */}
-      <span className="text-sm font-medium text-[#FAFAFA] w-14 flex-shrink-0 tabular-nums">
+      <span className="text-sm font-medium text-[var(--text-primary)] w-14 flex-shrink-0 tabular-nums">
         {appointment.time || "--:--"}
       </span>
 
@@ -365,11 +424,11 @@ function AppointmentRow({
 
       {/* Appointment details */}
       <div className="flex-1 min-w-0">
-        <span className="text-[15px] text-[#FAFAFA] truncate block">
+        <span className="text-[15px] text-[var(--text-primary)] truncate block">
           {appointment.title}
         </span>
         {appointment.doctor_name && (
-          <span className="text-xs text-[#A1A1AA] truncate block">
+          <span className="text-xs text-[var(--text-secondary)] truncate block">
             {appointment.doctor_name}
             {appointment.location ? ` · ${appointment.location}` : ""}
           </span>

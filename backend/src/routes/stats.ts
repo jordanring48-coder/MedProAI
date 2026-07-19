@@ -40,8 +40,8 @@ router.get("/stats/adherence", (req: Request, res: Response) => {
   const skipped = row.skipped || 0;
   const pending = row.pending || 0;
 
-  // Adherence = taken / (taken + missed), skip and pending don't count
-  const evaluable = taken + missed;
+  // Adherence = taken / (taken + missed + skipped), pending doesn't count
+  const evaluable = taken + missed + skipped;
   const adherence = evaluable > 0 ? Math.round((taken / evaluable) * 100) : -1;
 
   // Also count total medications for this user

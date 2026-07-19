@@ -158,6 +158,15 @@ export async function updateDose(
   return handleResponse<Dose>(res);
 }
 
+export async function confirmDose(
+  doseId: number
+): Promise<{ confirmed: number; cascadeSkipped: number[]; affectedIds: number[]; doses: Dose[] }> {
+  const res = await authFetch(`/api/doses/${doseId}/confirm`, {
+    method: "POST",
+  });
+  return handleResponse<{ confirmed: number; cascadeSkipped: number[]; affectedIds: number[]; doses: Dose[] }>(res);
+}
+
 // ── Stats API ──
 
 export async function fetchAdherenceStats(days: number = 30): Promise<AdherenceStats> {

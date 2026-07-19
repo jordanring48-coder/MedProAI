@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Medication, Dose, AdherenceStats, Appointment } from "../types";
-import { fetchMedications, fetchTodayDoses, fetchAdherenceStats, fetchUpcomingAppointments } from "../api";
+import { fetchMedications, fetchTodayDoses, fetchAdherenceStats, fetchUpcomingAppointments, confirmDose, updateDose } from "../api";
 import { useAuth } from "../AuthContext";
 import { useTheme } from "../ThemeContext";
 import usePremium from "../hooks/usePremium";
 import LogSymptomModal from "../components/LogSymptomModal";
 import AddEditMedicationModal from "../components/AddEditMedicationModal";
 import UserAvatar from "../components/UserAvatar";
+import DoseConfirmPopup from "../components/DoseConfirmPopup";
 
 function MintRing({ percentage, size = 100, strokeWidth = 8, celebrating = false }: { percentage: number; size?: number; strokeWidth?: number; celebrating?: boolean }) {
   const radius = (size - strokeWidth) / 2;
@@ -126,6 +127,8 @@ export default function HomePage() {
   const [showSymptomModal, setShowSymptomModal] = useState(false);
   const [showAddMedModal, setShowAddMedModal] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
+  const [popupDose, setPopupDose] = useState<Dose | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const prevAdherencePct = useRef(0);
   const dateRef = useRef(localToday());
 
@@ -352,25 +355,54 @@ export default function HomePage() {
           {/* Upcoming Card */}
           <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[#BC25F9]/25 overflow-hidden mb-4 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
             {/* Next dose */}
-            <button
-              onClick={() => navigate("/tracker")}
-              className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#151517]/60 transition-colors duration-200"
-            >
-              <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-medium text-[var(--text-primary)]">Next Dose</p>
-                <p className="text-sm text-[var(--text-secondary)] truncate">
-                  {nextDose
-                    ? `${nextDose.medication_name || "Medication"} at ${nextDose.scheduled_time}`
-                    : "No upcoming doses"}
-                </p>
-              </div>
-            </button>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  if (nextDose && nextDose.status === "pending") {
+                    e.stopPropagation();
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    setPopupDose(nextDose);
+                    setPopupPosition({ top: rect.bottom + 4, left: Math.max(8, rect.left - 20) });
+                  } else {
+                    navigate("/tracker");
+                  }
+                }}
+                className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#151517]/60 transition-colors duration-200"
+              >
+                <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[15px] font-medium text-[var(--text-primary)]">Next Dose</p>
+                  <p className="text-sm text-[var(--text-secondary)] truncate">
+                    {nextDose
+                      ? `${nextDose.medication_name || "Medication"} at ${nextDose.scheduled_time}`
+                      : "No upcoming doses"}
+                  </p>
+                </div>
+              </button>
+
+              {popupDose && (
+                <DoseConfirmPopup
+                  dose={popupDose}
+                  onConfirm={async () => {
+                    setPopupDose(null);
+                    try { await confirmDose(popupDose.id); } catch { await updateDose(popupDose.id, "taken"); }
+                    loadData();
+                  }}
+                  onSkip={async () => {
+                    setPopupDose(null);
+                    try { await updateDose(popupDose.id, "skipped"); } catch {}
+                    loadData();
+                  }}
+                  onCancel={() => setPopupDose(null)}
+                  position={popupPosition}
+                />
+              )}
+            </div>
 
             {/* Divider */}
             <div className="border-t border-[#BC25F9]/25" />

@@ -71,6 +71,24 @@ router.get("/doses/today", (req: Request, res: Response) => {
   const today = (dateParam && dateRegex.test(dateParam))
     ? dateParam
     : new Date().toISOString().slice(0, 10);
+
+  // Determine if we're fetching today's date (the actual current date)
+  const actualToday = new Date().toISOString().slice(0, 10);
+  const isToday = today === actualToday;
+
+  // Midnight auto-missed: flip past-due pending doses to "missed" for today's date
+  if (isToday) {
+    const nowTime = new Date();
+    const currentTimeStr = `${String(nowTime.getHours()).padStart(2, '0')}:${String(nowTime.getMinutes()).padStart(2, '0')}`;
+
+    db.prepare(
+      `UPDATE doses SET status = 'missed'
+       WHERE scheduled_date = ? AND user_id = ?
+       AND status = 'pending'
+       AND scheduled_time < ?`
+    ).run(today, userId, currentTimeStr);
+  }
+
   const doses = db
     .prepare(
       `SELECT d.*, m.name as medication_name, m.dosage as medication_dosage, m.frequency as medication_frequency
@@ -213,6 +231,76 @@ router.put("/doses/:id", (req: Request, res: Response) => {
   ).get(doseId, userId);
 
   res.json(updated);
+});
+
+// POST /api/doses/:id/confirm — confirm a dose as taken with cascade rule
+router.post("/doses/:id/confirm", (req: Request, res: Response) => {
+  const userId = getUserId(req);
+  const doseId = parseInt(req.params.id as string, 10);
+  if (isNaN(doseId)) {
+    res.status(400).json({ error: "Invalid dose ID" });
+    return;
+  }
+
+  const dose = db.prepare("SELECT * FROM doses WHERE id = ? AND user_id = ?").get(doseId, userId) as any;
+  if (!dose) {
+    res.status(404).json({ error: "Dose not found" });
+    return;
+  }
+
+  const affectedIds: number[] = [];
+  const now = new Date().toISOString();
+
+  const doConfirm = db.transaction(() => {
+    // 1. Mark the tapped dose as taken
+    db.prepare(
+      `UPDATE doses SET status = 'taken', taken_at = ? WHERE id = ? AND user_id = ?`
+    ).run(now, doseId, userId);
+    affectedIds.push(doseId);
+
+    // 2. Cascade: find earlier pending doses of the SAME medication on the SAME day
+    //    that are still pending, and mark them as skipped
+    const earlierDoses = db.prepare(
+      `SELECT id FROM doses
+       WHERE medication_id = ? AND scheduled_date = ? AND user_id = ?
+       AND status = 'pending'
+       AND scheduled_time < ?
+       AND id != ?
+       ORDER BY scheduled_time ASC`
+    ).all(
+      dose.medication_id,
+      dose.scheduled_date,
+      userId,
+      dose.scheduled_time,
+      doseId
+    ) as any[];
+
+    if (earlierDoses.length > 0) {
+      const skipStmt = db.prepare(
+        `UPDATE doses SET status = 'skipped' WHERE id = ? AND user_id = ?`
+      );
+      for (const ed of earlierDoses) {
+        skipStmt.run(ed.id, userId);
+        affectedIds.push(ed.id);
+      }
+    }
+  });
+
+  doConfirm();
+
+  // Return all affected dose IDs + updated doses
+  const updatedDoses = db.prepare(
+    `SELECT d.*, m.name as medication_name, m.dosage as medication_dosage, m.frequency as medication_frequency
+     FROM doses d JOIN medications m ON d.medication_id = m.id
+     WHERE d.id IN (${affectedIds.map(() => '?').join(',')}) AND d.user_id = ?`
+  ).all(...affectedIds, userId);
+
+  res.json({
+    confirmed: doseId,
+    cascadeSkipped: affectedIds.filter(id => id !== doseId),
+    affectedIds,
+    doses: updatedDoses,
+  });
 });
 
 export default router;

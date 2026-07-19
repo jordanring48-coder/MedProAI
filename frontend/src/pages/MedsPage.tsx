@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Medication, Dose, Symptom, SymptomPattern, TimelineEntry } from "../types";
 import { getRefillStatus, getRefillLabel } from "../types";
-import { fetchMedications, fetchTodayDoses, updateDose, fetchSymptoms, fetchSymptomPatterns, fetchTimeline } from "../api";
+import { fetchMedications, fetchTodayDoses, updateDose, confirmDose, fetchSymptoms, fetchSymptomPatterns, fetchTimeline } from "../api";
 import AddEditMedicationModal from "../components/AddEditMedicationModal";
 import LogSymptomModal from "../components/LogSymptomModal";
 import usePremium from "../hooks/usePremium";
 import UserAvatar from "../components/UserAvatar";
+import DoseConfirmPopup from "../components/DoseConfirmPopup";
 
 const refillColors = {
   green: { dot: "bg-[#34D399]", ring: "ring-[#34D399]/20", border: "border-l-[#34D399]" },
@@ -257,9 +258,9 @@ export default function MedsPage() {
               <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-[#FAFAFA] tracking-tight">Tracker</h1>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">Tracker</h1>
         </div>
-        <p className="text-[15px] text-[#71717A] mt-1.5 ml-[42px]">Track your medications, symptoms & timeline</p>
+        <p className="text-[15px] text-[var(--text-secondary)] mt-1.5 ml-[42px]">Track your medications, symptoms & timeline</p>
       </div>
 
       <div className="px-5">
@@ -269,7 +270,7 @@ export default function MedsPage() {
           <button
             onClick={() => setViewMode("meds")}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              viewMode === "meds" ? "bg-[#111113] text-[#FAFAFA] shadow-sm" : "text-[#71717A] hover:text-[#A1A1AA]"
+              viewMode === "meds" ? "bg-[#111113] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
           >
             Medications
@@ -277,7 +278,7 @@ export default function MedsPage() {
           <button
             onClick={() => setViewMode("symptoms")}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              viewMode === "symptoms" ? "bg-[#111113] text-[#FAFAFA] shadow-sm" : "text-[#71717A] hover:text-[#A1A1AA]"
+              viewMode === "symptoms" ? "bg-[#111113] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
           >
             Symptoms
@@ -285,7 +286,7 @@ export default function MedsPage() {
           <button
             onClick={() => setViewMode("timeline")}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              viewMode === "timeline" ? "bg-[#111113] text-[#FAFAFA] shadow-sm" : "text-[#71717A] hover:text-[#A1A1AA]"
+              viewMode === "timeline" ? "bg-[#111113] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
           >
             Timeline
@@ -297,9 +298,9 @@ export default function MedsPage() {
       {viewMode === "symptoms" && isPremium && (
         <div className="space-y-3 pb-20">
           {symptoms.length === 0 ? (
-            <div className="bg-[#111113] rounded-3xl p-8 text-center border border-[#27272A] shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-              <p className="text-[#A1A1AA]">No symptoms logged yet.</p>
-              <p className="text-sm text-[#71717A] mt-1">Tap the cyan + button to log your first symptom.</p>
+            <div className="bg-[#111113] rounded-3xl p-8 text-center border border-[#BC25F9]/25 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+              <p className="text-[var(--text-secondary)]">No symptoms logged yet.</p>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">Tap the cyan + button to log your first symptom.</p>
             </div>
           ) : (
             symptoms.map((s) => {
@@ -308,7 +309,7 @@ export default function MedsPage() {
               return (
                 <div
                   key={s.id}
-                  className="bg-[#111113] rounded-2xl p-5 border border-[#27272A] hover:border-[#3F3F46] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                  className="bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[#3F3F46] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
                 >
                   <div className="flex items-center gap-4">
                     <div
@@ -322,7 +323,7 @@ export default function MedsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-[#FAFAFA] text-[17px]">{s.name}</h3>
+                        <h3 className="font-semibold text-[var(--text-primary)] text-[17px]">{s.name}</h3>
                         <span
                           className="text-xs font-medium px-2 py-0.5 rounded-full"
                           style={{ backgroundColor: `${sevColor}15`, color: sevColor }}
@@ -331,12 +332,12 @@ export default function MedsPage() {
                         </span>
                       </div>
                       {s.notes && (
-                        <p className="text-sm text-[#A1A1AA] mt-1 line-clamp-2">{s.notes}</p>
+                        <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">{s.notes}</p>
                       )}
                       <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-xs text-[#71717A]">{relativeTime(s.logged_at)}</span>
-                        <span className="text-[#3F3F46]">•</span>
-                        <span className="text-xs text-[#71717A]">{localDateStr(s.logged_at)}</span>
+                        <span className="text-xs text-[var(--text-secondary)]">{relativeTime(s.logged_at)}</span>
+                        <span className="text-[var(--text-secondary)]">•</span>
+                        <span className="text-xs text-[var(--text-secondary)]">{localDateStr(s.logged_at)}</span>
                       </div>
                     </div>
                   </div>
@@ -347,13 +348,13 @@ export default function MedsPage() {
 
           {/* Symptom Patterns */}
           {patterns.length > 0 && (
-            <div className="bg-[#111113] rounded-2xl border border-[#27272A] p-6 mt-4">
+            <div className="bg-[#111113] rounded-2xl border border-[#BC25F9]/25 p-6 mt-4 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="flex items-center gap-2 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FBBF24" className="w-5 h-5">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
-                <h2 className="text-[17px] font-semibold text-[#FAFAFA]">Symptom Patterns</h2>
-                <span className="text-xs text-[#71717A]">30 days</span>
+                <h2 className="text-[17px] font-semibold text-[var(--text-primary)]">Symptom Patterns</h2>
+                <span className="text-xs text-[var(--text-secondary)]">30 days</span>
               </div>
               <div className="space-y-3">
                 {patterns.slice(0, 5).map((p) => {
@@ -369,10 +370,10 @@ export default function MedsPage() {
                     <div key={p.name} className="flex items-center gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-[15px] font-medium text-[#FAFAFA]">
+                          <span className="text-[15px] font-medium text-[var(--text-primary)]">
                             {p.name}
                           </span>
-                          <span className="text-sm text-[#A1A1AA]">
+                          <span className="text-sm text-[var(--text-secondary)]">
                             {p.count}x
                           </span>
                         </div>
@@ -386,7 +387,7 @@ export default function MedsPage() {
                           />
                         </div>
                         <div className="flex items-center justify-between mt-1">
-                          <span className="text-xs text-[#71717A]">
+                          <span className="text-xs text-[var(--text-secondary)]">
                             Avg severity
                           </span>
                           <span
@@ -413,7 +414,7 @@ export default function MedsPage() {
         {tlLoading && (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] animate-pulse">
+              <div key={i} className="bg-[#111113] rounded-2xl p-4 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
                 <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
                 <div className="space-y-3">
                   <div className="flex gap-3">
@@ -431,7 +432,7 @@ export default function MedsPage() {
 
         {/* Error */}
         {!tlLoading && tlError && (
-          <div className="bg-[#111113] rounded-2xl p-6 border border-[#27272A] text-center">
+          <div className="bg-[#111113] rounded-2xl p-6 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
             <p className="text-[#F87171] text-sm mb-2">{tlError}</p>
             <button
               onClick={loadTimeline}
@@ -444,7 +445,7 @@ export default function MedsPage() {
 
         {/* Empty state */}
         {!tlLoading && !tlError && timelineGroups.length === 0 && (
-          <div className="bg-[#111113] rounded-2xl p-8 border border-[#27272A] text-center">
+          <div className="bg-[#111113] rounded-2xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
             <div className="w-16 h-16 bg-[#BC25F9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -453,8 +454,8 @@ export default function MedsPage() {
                 <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
             </div>
-            <h3 className="font-semibold text-[#FAFAFA] mb-1">No activity yet</h3>
-            <p className="text-sm text-[#A1A1AA]">
+            <h3 className="font-semibold text-[var(--text-primary)] mb-1">No activity yet</h3>
+            <p className="text-sm text-[var(--text-secondary)]">
               Doses and logged symptoms will appear here as they happen.
             </p>
           </div>
@@ -464,12 +465,12 @@ export default function MedsPage() {
         {!tlLoading && !tlError && timelineGroups.length > 0 && (
           <div className="space-y-3 pb-20">
             {timelineGroups.map((group) => (
-              <div key={group.date} className="bg-[#111113] rounded-2xl border border-[#27272A] overflow-hidden">
+              <div key={group.date} className="bg-[#111113] rounded-2xl border border-[#BC25F9]/25 overflow-hidden shadow-[0_0_12px_rgba(188,37,249,0.18)]">
                 {/* Date header */}
-                <div className="px-4 py-3 border-b border-[#27272A]">
-                  <h2 className="text-sm font-semibold text-[#A1A1AA]">
+                <div className="px-4 py-3 border-b border-[#BC25F9]/25">
+                  <h2 className="text-sm font-semibold text-[var(--text-secondary)]">
                     {group.label}
-                    <span className="text-xs text-[#71717A] ml-2">
+                    <span className="text-xs text-[var(--text-secondary)] ml-2">
                       {group.entries.length} item{group.entries.length !== 1 ? "s" : ""}
                     </span>
                   </h2>
@@ -508,25 +509,25 @@ export default function MedsPage() {
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-[15px] font-medium text-[#FAFAFA] truncate">
+                              <span className="text-[15px] font-medium text-[var(--text-primary)] truncate">
                                 {entry.medication_name || `Medication #${entry.medication_id}`}
                               </span>
                               {entry.dosage && (
-                                <span className="text-xs text-[#71717A]">{entry.dosage}</span>
+                                <span className="text-xs text-[var(--text-secondary)]">{entry.dosage}</span>
                               )}
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-sm text-[#A1A1AA]">{entry.scheduled_time}</span>
-                              <span className="text-[#3F3F46]">•</span>
+                              <span className="text-sm text-[var(--text-secondary)]">{entry.scheduled_time}</span>
+                              <span className="text-[var(--text-secondary)]">•</span>
                               <span
                                 className={`text-xs font-medium ${
-                                  isTaken ? "text-[#34D399]" : isMissed ? "text-[#F87171]" : "text-[#A1A1AA]"
+                                  isTaken ? "text-[#34D399]" : isMissed ? "text-[#F87171]" : "text-[var(--text-secondary)]"
                                 }`}
                               >
                                 {isTaken ? "Taken" : isMissed ? "Missed" : status === "skipped" ? "Skipped" : "Pending"}
                               </span>
-                              <span className="text-[#3F3F46]">•</span>
-                              <span className="text-xs text-[#71717A]">{relativeTime(entry.timestamp)}</span>
+                              <span className="text-[var(--text-secondary)]">•</span>
+                              <span className="text-xs text-[var(--text-secondary)]">{relativeTime(entry.timestamp)}</span>
                             </div>
                           </div>
                         </div>
@@ -551,11 +552,11 @@ export default function MedsPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-[15px] font-medium text-[#FAFAFA]">{entry.name}</span>
-                              <span className="text-xs text-[#71717A]">{sevLabel}</span>
+                              <span className="text-[15px] font-medium text-[var(--text-primary)]">{entry.name}</span>
+                              <span className="text-xs text-[var(--text-secondary)]">{sevLabel}</span>
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-xs text-[#71717A]">{relativeTime(entry.timestamp)}</span>
+                              <span className="text-xs text-[var(--text-secondary)]">{relativeTime(entry.timestamp)}</span>
                             </div>
                           </div>
                         </div>
@@ -572,7 +573,7 @@ export default function MedsPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-[15px] font-medium text-[#FAFAFA] truncate">
+                            <span className="text-[15px] font-medium text-[var(--text-primary)] truncate">
                               {entry.medication_name || `Medication #${entry.medication_id}`}
                             </span>
                             <span className="text-xs text-[#BC25F9] bg-[#BC25F9]/10 px-2 py-0.5 rounded-full font-medium">
@@ -580,11 +581,11 @@ export default function MedsPage() {
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs text-[#71717A]">{relativeTime(entry.timestamp)}</span>
+                            <span className="text-xs text-[var(--text-secondary)]">{relativeTime(entry.timestamp)}</span>
                             {entry.medDosage && (
                               <>
-                                <span className="text-[#3F3F46]">•</span>
-                                <span className="text-xs text-[#71717A]">{entry.medDosage}</span>
+                                <span className="text-[var(--text-secondary)]">•</span>
+                                <span className="text-xs text-[var(--text-secondary)]">{entry.medDosage}</span>
                               </>
                             )}
                           </div>
@@ -605,10 +606,10 @@ export default function MedsPage() {
       <>
       {/* Today's Doses Card */}
       {!loading && todayDoses.length > 0 && (
-        <div className="bg-[#111113] rounded-3xl border border-[#27272A] p-5 mb-5 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+        <div className="bg-[#111113] rounded-3xl border border-[#BC25F9]/25 p-5 mb-5 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[17px] font-semibold text-[#FAFAFA] tracking-tight">Today</h2>
-            <span className="text-sm text-[#A1A1AA]">
+            <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">Today</h2>
+            <span className="text-sm text-[var(--text-secondary)]">
               {takenToday} of {totalToday} taken
             </span>
           </div>
@@ -637,12 +638,12 @@ export default function MedsPage() {
                       <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
                     </svg>
                   </div>
-                  <span className="text-[15px] font-medium text-[#FAFAFA]">{medName}</span>
+                  <span className="text-[15px] font-medium text-[var(--text-primary)]">{medName}</span>
                   {doses[0]?.medication_frequency && (
-                    <span className="text-xs text-[#A1A1AA]">{doses[0].medication_frequency}</span>
+                    <span className="text-xs text-[var(--text-secondary)]">{doses[0].medication_frequency}</span>
                   )}
                   {doses[0]?.medication_dosage && (
-                    <span className="text-xs text-[#71717A]">{doses[0].medication_dosage}</span>
+                    <span className="text-xs text-[var(--text-secondary)]">{doses[0].medication_dosage}</span>
                   )}
                   <div className="flex-1" />
                   {/* Circular check-all checkbox */}
@@ -671,36 +672,13 @@ export default function MedsPage() {
                     const isTaken = effectiveStatus === "taken";
 
                     return (
-                      <button
+                      <DosePill
                         key={dose.id}
-                        onClick={() => {
-                          if (isTaken) {
-                            handleDoseUpdate(dose, "pending");
-                          } else {
-                            handleDoseUpdate(dose, "taken");
-                          }
-                        }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 active:scale-[0.97] ${
-                          isTaken
-                            ? "bg-[#34D399]/10 text-[#34D399] line-through shadow-[0_0_8px_rgba(52,211,153,0.15)]"
-                            : effectiveStatus === "missed"
-                            ? "bg-[#F87171]/10 text-[#F87171]"
-                            : effectiveStatus === "skipped"
-                            ? "bg-[#27272A] text-[#71717A] line-through"
-                            : "bg-[#151517] text-[#A1A1AA] border border-[#27272A] hover:border-[#BC25F9] hover:text-[#BC25F9]"
-                        }`}
-                      >
-                        {isTaken ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                          </svg>
-                        ) : effectiveStatus === "missed" ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-                          </svg>
-                        ) : null}
-                        {dose.scheduled_time}
-                      </button>
+                        dose={dose}
+                        effectiveStatus={effectiveStatus}
+                        isTaken={isTaken}
+                        onDoseUpdate={loadData}
+                      />
                     );
                   })}
                 </div>
@@ -714,7 +692,7 @@ export default function MedsPage() {
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-[#111113] rounded-3xl p-5 border border-[#27272A] animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+            <div key={i} className="bg-[#111113] rounded-3xl p-5 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-[#27272A] rounded-xl" />
                 <div className="flex-1 space-y-2">
@@ -729,7 +707,7 @@ export default function MedsPage() {
 
       {/* Error state */}
       {!loading && error && (
-        <div className="bg-[#111113] rounded-3xl p-8 border border-[#27272A] text-center shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+        <div className="bg-[#111113] rounded-3xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
           <div className="w-16 h-16 bg-[#F87171]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
               <circle cx="12" cy="12" r="10" />
@@ -737,8 +715,8 @@ export default function MedsPage() {
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <p className="text-[#FAFAFA] font-medium mb-1">Something went wrong</p>
-          <p className="text-sm text-[#A1A1AA] mb-4">{error}</p>
+          <p className="text-[var(--text-primary)] font-medium mb-1">Something went wrong</p>
+          <p className="text-sm text-[var(--text-secondary)] mb-4">{error}</p>
           <button
             onClick={loadData}
             className="text-[#BC25F9] font-medium hover:underline"
@@ -756,8 +734,8 @@ export default function MedsPage() {
               <path d="M6 2h12v2H6V2zm0 4h12v2H6V6zm0 4h8v2H6v-2zm-2 4h16v8H4v-8z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-[#FAFAFA] mb-2 tracking-tight">No medications yet</h2>
-          <p className="text-[15px] text-[#A1A1AA] text-center max-w-xs mb-8">
+          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">No medications yet</h2>
+          <p className="text-[15px] text-[var(--text-secondary)] text-center max-w-xs mb-8">
             Tap the + button to add your first medication and start tracking your health.
           </p>
           <button
@@ -779,7 +757,7 @@ export default function MedsPage() {
               <button
                 key={med.id}
                 onClick={() => navigate(`/medications/${med.id}`)}
-                className={`w-full text-left bg-[#111113] rounded-2xl p-5 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.99] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] ${
+                className={`w-full text-left bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[#3F3F46] active:scale-[0.99] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] ${
                   med.refill_date ? `border-l-2 ${colors.border}` : ""
                 }`}
               >
@@ -793,24 +771,24 @@ export default function MedsPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#FAFAFA] text-[17px] truncate">
+                    <h3 className="font-semibold text-[var(--text-primary)] text-[17px] truncate">
                       {med.name}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
                       {med.dosage && (
-                        <span className="text-sm text-[#A1A1AA]">{med.dosage}</span>
+                        <span className="text-sm text-[var(--text-secondary)]">{med.dosage}</span>
                       )}
                       {med.dosage && (med.quantity || med.frequency) && (
-                        <span className="text-[#3F3F46]">•</span>
+                        <span className="text-[var(--text-secondary)]">•</span>
                       )}
                       {med.quantity && (
-                        <span className="text-sm text-[#A1A1AA]">Qty: {med.quantity}</span>
+                        <span className="text-sm text-[var(--text-secondary)]">Qty: {med.quantity}</span>
                       )}
                       {med.quantity && med.frequency && (
-                        <span className="text-[#3F3F46]">•</span>
+                        <span className="text-[var(--text-secondary)]">•</span>
                       )}
                       {med.frequency && (
-                        <span className="text-sm text-[#A1A1AA]">{med.frequency}</span>
+                        <span className="text-sm text-[var(--text-secondary)]">{med.frequency}</span>
                       )}
                     </div>
                   </div>
@@ -819,21 +797,21 @@ export default function MedsPage() {
                   {med.refill_date && (
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <div className={`w-2.5 h-2.5 ${colors.dot} rounded-full ring-2 ${colors.ring}`} />
-                      <span className="text-xs text-[#71717A]">
+                      <span className="text-xs text-[var(--text-secondary)]">
                         {status === "red" ? "Soon" : status === "orange" ? "Upcoming" : "OK"}
                       </span>
                     </div>
                   )}
 
                   {/* Chevron */}
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#3F3F46] flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0">
                     <path d="M9 18l6-6-6-6" />
                   </svg>
                 </div>
 
                 {/* Refill label below */}
                 {med.refill_date && (
-                  <div className="mt-3 pt-3 border-t border-[#27272A]">
+                  <div className="mt-3 pt-3 border-t border-[#BC25F9]/25">
                     <p className={`text-xs font-medium ${
                       status === "red" ? "text-[#F87171]" :
                       status === "orange" ? "text-[#FBBF24]" :
@@ -894,6 +872,99 @@ export default function MedsPage() {
           onSaved={() => {
             setShowSymptomModal(false);
           }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ── Dose Pill (inline popup trigger) ── */
+
+function DosePill({
+  dose,
+  effectiveStatus,
+  isTaken,
+  onDoseUpdate,
+}: {
+  dose: Dose;
+  effectiveStatus: string;
+  isTaken: boolean;
+  onDoseUpdate: () => void;
+}) {
+  const [showPopup, setShowPopup] = useState(false);
+  const pillRef = useRef<HTMLButtonElement>(null);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isTaken || effectiveStatus === "missed") {
+      // Toggle back to pending for taken doses
+      if (isTaken) {
+        updateDose(dose.id, "pending").then(onDoseUpdate).catch(() => {});
+      }
+      return;
+    }
+    if (effectiveStatus === "skipped") return; // No action for skipped
+
+    // Pending: show popup
+    e.stopPropagation();
+    setShowPopup(true);
+  };
+
+  const handleConfirm = async () => {
+    setShowPopup(false);
+    try {
+      await confirmDose(dose.id);
+    } catch {
+      await updateDose(dose.id, "taken");
+    }
+    onDoseUpdate();
+  };
+
+  const handleSkip = async () => {
+    setShowPopup(false);
+    try {
+      await updateDose(dose.id, "skipped");
+    } catch {}
+    onDoseUpdate();
+  };
+
+  const handleCancel = () => {
+    setShowPopup(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        ref={pillRef}
+        onClick={handleClick}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 active:scale-[0.97] ${
+          isTaken
+            ? "bg-[#34D399]/10 text-[#34D399] line-through shadow-[0_0_8px_rgba(52,211,153,0.15)]"
+            : effectiveStatus === "missed"
+            ? "bg-[#F87171]/10 text-[#F87171]"
+            : effectiveStatus === "skipped"
+            ? "bg-[#27272A] text-[var(--text-secondary)] line-through"
+            : "bg-[#151517] text-[var(--text-secondary)] border border-[#BC25F9]/25 hover:border-[#BC25F9] hover:text-[#BC25F9] cursor-pointer"
+        }`}
+      >
+        {isTaken ? (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+          </svg>
+        ) : effectiveStatus === "missed" ? (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+          </svg>
+        ) : null}
+        {dose.scheduled_time}
+      </button>
+
+      {showPopup && (
+        <DoseConfirmPopup
+          dose={dose}
+          onConfirm={handleConfirm}
+          onSkip={handleSkip}
+          onCancel={handleCancel}
+          position={undefined}
         />
       )}
     </div>
