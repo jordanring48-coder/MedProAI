@@ -5,6 +5,41 @@ import type { AuthUser } from "../middleware/auth.js";
 
 const router = Router();
 
+// ── Dose-form suffixes to strip from medication names ──
+const DOSE_FORM_SUFFIXES = [
+  "Chewable Tablet", "Extended Release", "Injectable Solution",
+  "Oral Capsule", "Oral Solution", "Oral Tablet",
+  "Capsule", "Inhaler", "Injection", "Lozenge",
+  "Ointment", "Patch", "Pill", "Powder",
+  "Solution", "Spray", "Suppository", "Suspension",
+  "Syrup", "Tablet", "Cream", "Drops",
+  "Elixir", "Gel",
+  "ER", "XR", "SR", "DR",
+];
+// Sort by length descending so longer multi-word suffixes match first
+DOSE_FORM_SUFFIXES.sort((a, b) => b.length - a.length);
+
+function cleanMedicationName(name: string): string {
+  let cleaned = name.trim();
+
+  // Strip one trailing dose-form suffix (case-insensitive)
+  for (const suffix of DOSE_FORM_SUFFIXES) {
+    const escaped = suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`\\s+${escaped}$`, "i");
+    if (re.test(cleaned)) {
+      cleaned = cleaned.replace(re, "");
+      break;
+    }
+  }
+
+  // Title case: capitalize first letter of each word, lowercase the rest
+  cleaned = cleaned.replace(/\b\w+/g, (word) =>
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  );
+
+  return cleaned;
+}
+
 function getUserId(req: Request): number {
   return (req.user as AuthUser).id;
 }
@@ -100,7 +135,7 @@ router.post("/", (req: Request, res: Response) => {
 
   const result = stmt.run(
     userId,
-    (name as string).trim(),
+    cleanMedicationName(name as string),
     (dosage as string)?.trim() || "",
     (quantity as string)?.trim() || "",
     (frequency as string)?.trim() || "",
@@ -197,7 +232,7 @@ router.put("/:id", (req: Request, res: Response) => {
     SET name = ?, dosage = ?, quantity = ?, frequency = ?, prescribing_doctor = ?, refill_date = ?, instructions = ?, reminder_times = ?, updated_at = datetime('now')
     WHERE id = ? AND user_id = ?
   `).run(
-    name !== undefined ? (name as string).trim() : medAny.name,
+    name !== undefined ? cleanMedicationName(name as string) : medAny.name,
     dosage !== undefined ? ((dosage as string)?.trim() || "") : medAny.dosage,
     quantity !== undefined ? ((quantity as string)?.trim() || "") : medAny.quantity,
     frequency !== undefined ? ((frequency as string)?.trim() || "") : medAny.frequency,
