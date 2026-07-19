@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Medication, Dose, AdherenceStats, Appointment } from "../types";
 import { fetchMedications, fetchTodayDoses, fetchAdherenceStats, fetchUpcomingAppointments } from "../api";
@@ -45,7 +45,7 @@ function MintRing({ percentage, size = 100, strokeWidth = 8, celebrating = false
       >
         <circle
           cx={size / 2} cy={size / 2} r={radius}
-          stroke="#27272A" strokeWidth={strokeWidth} fill="none"
+          stroke="var(--bg-tertiary)" strokeWidth={strokeWidth} fill="none"
         />
         <circle
           cx={size / 2} cy={size / 2} r={radius}
@@ -106,6 +106,12 @@ function getSubtitle(streak: number, adherencePct: number, totalToday: number, t
   return "No doses scheduled for today";
 }
 
+function localToday(): string {
+  // Returns YYYY-MM-DD in the user's local timezone
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -119,25 +125,63 @@ export default function HomePage() {
   const [showAddMedModal, setShowAddMedModal] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const prevAdherencePct = useRef(0);
+  const dateRef = useRef(localToday());
+
+  const loadData = useCallback(async () => {
+    const today = localToday();
+    try {
+      const [medsData, dosesData, statsData] = await Promise.all([
+        fetchMedications(),
+        fetchTodayDoses(today),
+        fetchAdherenceStats(7),
+      ]);
+      setMeds(medsData);
+      setTodayDoses(dosesData);
+      setStats(statsData);
+    } catch {}
+    // Appointments in background
+    fetchUpcomingAppointments().then(setAppointments).catch(() => {});
+    setLoading(false);
+    setCelebrating(false);
+    dateRef.current = today;
+  }, []);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [medsData, dosesData, statsData] = await Promise.all([
-          fetchMedications(),
-          fetchTodayDoses(),
-          fetchAdherenceStats(7),
-        ]);
-        setMeds(medsData);
-        setTodayDoses(dosesData);
-        setStats(statsData);
-      } catch {}
-      // Appointments in background
-      fetchUpcomingAppointments().then(setAppointments).catch(() => {});
-      setLoading(false);
+    loadData();
+  }, [loadData]);
+
+  // Midnight refresh: reload when the date changes
+  useEffect(() => {
+    const scheduleMidnightRefresh = () => {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      const msUntilMidnight = midnight.getTime() - now.getTime();
+
+      return setTimeout(() => {
+        loadData();
+        // After midnight, reschedule for the next midnight
+        const nextTimeout = scheduleMidnightRefresh();
+        return () => clearTimeout(nextTimeout);
+      }, msUntilMidnight);
     };
-    load();
-  }, []);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        if (localToday() !== dateRef.current) {
+          loadData();
+        }
+      }
+    };
+
+    const timeout = scheduleMidnightRefresh();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [loadData]);
 
   const takenToday = todayDoses.filter((d) => d.status === "taken").length;
   const totalToday = todayDoses.length;
@@ -179,16 +223,16 @@ export default function HomePage() {
   return (
     <div className="pb-24 min-h-screen">
       {/* Greeting */}
-      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-14 pb-6 px-5">
+      <div className="relative bg-[var(--bg-primary)] pt-14 pb-6 px-5">
         <div className="absolute right-5 top-3">
           <UserAvatar />
         </div>
         <div className="flex justify-center mb-4">
-          <img src="/luna-header.png" alt="Luna" className="h-16 object-contain" />
+          <img src="/luna-header.png" alt="Luna" className="h-28 object-contain" />
         </div>
         <div className="flex items-center gap-2 mb-1">
           {getTimeIcon()}
-          <span className="text-[17px] font-medium text-[#A1A1AA]">{getGreeting()},</span>
+          <span className="text-[17px] font-medium text-[var(--text-secondary)]">{getGreeting()},</span>
         </div>
         <h2 className="text-4xl font-bold text-[#FAFAFA] tracking-tight">{name}</h2>
         <p className="text-sm text-[#71717A] mt-1">{subtitle}</p>
@@ -198,7 +242,7 @@ export default function HomePage() {
       {/* Loading skeleton */}
       {loading && (
         <div className="space-y-4">
-          <div className="bg-[#111113] rounded-3xl p-6 border border-[#27272A] animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+          <div className="bg-[var(--bg-secondary)] rounded-3xl p-6 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
             <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
             <div className="flex items-center gap-6">
               <div className="w-[100px] h-[100px] bg-[#27272A] rounded-full" />
@@ -216,7 +260,7 @@ export default function HomePage() {
           {/* Today's Meds Status Card */}
           <button
             onClick={() => navigate("/tracker")}
-            className="w-full text-left bg-[#111113] rounded-3xl p-6 border border-[#27272A] mb-4 hover:border-[#3F3F46] active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+            className="w-full text-left bg-[var(--bg-secondary)] rounded-3xl p-6 border border-[#BC25F9]/25 mb-4 hover:border-[#BC25F9]/50 active:scale-[0.98] transition-all duration-300 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
           >
             <div className="flex items-center gap-5">
               <MintRing percentage={adherencePct} size={90} strokeWidth={7} celebrating={celebrating} />
@@ -224,7 +268,7 @@ export default function HomePage() {
                 <h3 className="text-[17px] font-semibold text-[#FAFAFA] mb-1">
                   Today's Medications
                 </h3>
-                <p className="text-[15px] text-[#A1A1AA]">
+                <p className="text-[15px] text-[var(--text-secondary)]">
                   {totalToday > 0
                     ? `${takenToday} of ${totalToday} taken`
                     : "No doses scheduled today"}
@@ -248,7 +292,7 @@ export default function HomePage() {
           {streakCount >= 2 && (
             <button
               onClick={() => navigate("/timeline")}
-              className="w-full text-left bg-[#111113] rounded-3xl p-4 border border-[#FBBF24]/20 mb-4 hover:border-[#FBBF24]/40 active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+              className="w-full text-left bg-[var(--bg-secondary)] rounded-3xl p-4 border border-[#FBBF24]/20 mb-4 hover:border-[#FBBF24]/40 active:scale-[0.98] transition-all duration-300 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
               style={{ boxShadow: "0 0 20px rgba(251, 191, 36, 0.08)" }}
             >
               <div className="flex items-center gap-4">
@@ -259,7 +303,7 @@ export default function HomePage() {
                   <h3 className="text-[17px] font-bold text-[#FAFAFA]">
                     {streakCount}-Day Streak!
                   </h3>
-                  <p className="text-[15px] text-[#A1A1AA] mt-0.5">
+                  <p className="text-[15px] text-[var(--text-secondary)] mt-0.5">
                     {streakMessage}
                   </p>
                 </div>
@@ -273,7 +317,7 @@ export default function HomePage() {
           {/* Adherence (7d) Card */}
           <button
             onClick={() => navigate("/timeline")}
-            className="w-full text-left bg-[#111113] rounded-3xl p-6 border border-[#27272A] mb-4 hover:border-[#3F3F46] active:scale-[0.98] transition-all duration-300 shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+            className="w-full text-left bg-[var(--bg-secondary)] rounded-3xl p-6 border border-[#BC25F9]/25 mb-4 hover:border-[#BC25F9]/50 active:scale-[0.98] transition-all duration-300 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-[#BC25F9]/10 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -283,7 +327,7 @@ export default function HomePage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-[17px] font-semibold text-[#FAFAFA]">Adherence (7d)</h3>
-                <p className="text-[15px] text-[#A1A1AA] mt-0.5">
+                <p className="text-[15px] text-[var(--text-secondary)] mt-0.5">
                   {adherence7d === -1
                     ? "No data yet"
                     : adherence7d >= 80
@@ -304,7 +348,7 @@ export default function HomePage() {
           </button>
 
           {/* Upcoming Card */}
-          <div className="bg-[#111113] rounded-3xl border border-[#27272A] overflow-hidden mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+          <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[#BC25F9]/25 overflow-hidden mb-4 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
             {/* Next dose */}
             <button
               onClick={() => navigate("/tracker")}
@@ -318,7 +362,7 @@ export default function HomePage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-medium text-[#FAFAFA]">Next Dose</p>
-                <p className="text-sm text-[#A1A1AA] truncate">
+                <p className="text-sm text-[var(--text-secondary)] truncate">
                   {nextDose
                     ? `${nextDose.medication_name || "Medication"} at ${nextDose.scheduled_time}`
                     : "No upcoming doses"}
@@ -327,7 +371,7 @@ export default function HomePage() {
             </button>
 
             {/* Divider */}
-            <div className="border-t border-[#27272A]" />
+            <div className="border-t border-[#BC25F9]/25" />
 
             {/* Next appointment (premium) */}
             <button
@@ -344,7 +388,7 @@ export default function HomePage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[15px] font-medium text-[#FAFAFA]">Next Appointment</p>
-                <p className="text-sm text-[#A1A1AA] truncate">
+                <p className="text-sm text-[var(--text-secondary)] truncate">
                   {isPremium
                     ? nextAppt
                       ? `${nextAppt.title} — ${new Date(nextAppt.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
@@ -362,7 +406,7 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-3 mb-6">
             <button
               onClick={() => setShowSymptomModal(true)}
-              className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
+              className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[#BC25F9]/25 hover:border-[#BC25F9]/50 active:scale-[0.97] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] flex flex-col items-center gap-2"
             >
               <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -370,24 +414,24 @@ export default function HomePage() {
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
               </div>
-              <span className="text-xs font-medium text-[#A1A1AA]">Log Symptom</span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Log Symptom</span>
             </button>
 
             <button
               onClick={() => setShowAddMedModal(true)}
-              className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
+              className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[#BC25F9]/25 hover:border-[#BC25F9]/50 active:scale-[0.97] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] flex flex-col items-center gap-2"
             >
               <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
               </div>
-              <span className="text-xs font-medium text-[#A1A1AA]">Add Med</span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Add Med</span>
             </button>
 
             <button
               onClick={() => navigate("/timeline")}
-              className="bg-[#111113] rounded-2xl p-4 border border-[#27272A] hover:border-[#3F3F46] active:scale-[0.97] transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.3)] flex flex-col items-center gap-2"
+              className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[#BC25F9]/25 hover:border-[#BC25F9]/50 active:scale-[0.97] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] flex flex-col items-center gap-2"
             >
               <div className="w-10 h-10 bg-[#FBBF24]/10 rounded-xl flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -397,13 +441,13 @@ export default function HomePage() {
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
               </div>
-              <span className="text-xs font-medium text-[#A1A1AA]">Timeline</span>
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Timeline</span>
             </button>
           </div>
 
           {/* Medication summary */}
           {meds.length > 0 && (
-            <div className="bg-[#111113] rounded-3xl border border-[#27272A] p-5 mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+            <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[#BC25F9]/25 p-5 mb-4 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[17px] font-semibold text-[#FAFAFA]">Your Medications</h3>
                 <button

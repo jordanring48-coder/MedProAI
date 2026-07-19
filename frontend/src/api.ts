@@ -107,8 +107,9 @@ export async function deleteMedication(id: number | string): Promise<void> {
 
 // ── Doses API ──
 
-export async function fetchTodayDoses(): Promise<Dose[]> {
-  const res = await authFetch("/api/doses/today");
+export async function fetchTodayDoses(date?: string): Promise<Dose[]> {
+  const url = date ? `/api/doses/today?date=${encodeURIComponent(date)}` : "/api/doses/today";
+  const res = await authFetch(url);
   return handleResponse<Dose[]>(res);
 }
 
@@ -341,4 +342,76 @@ export async function updateProfile(token: string, data: { avatarColor?: string 
   });
   if (!res.ok) throw new Error("Failed to update profile");
   return res.json();
+}
+
+// ── Allergies API ──
+
+export async function fetchAllergies(): Promise<{ allergies: Array<{ id: number; name: string }> }> {
+  const res = await authFetch("/api/allergies");
+  return handleResponse<{ allergies: Array<{ id: number; name: string }> }>(res);
+}
+
+export async function createAllergy(name: string): Promise<{ id: number; name: string }> {
+  const res = await authFetch("/api/allergies", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  return handleResponse<{ id: number; name: string }>(res);
+}
+
+export async function deleteAllergy(id: number): Promise<void> {
+  const res = await authFetch(`/api/allergies/${id}`, { method: "DELETE" });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || "Delete failed");
+  }
+}
+
+// ── Providers API ──
+
+export async function fetchProviders(): Promise<{ providers: Array<import("./types").Provider> }> {
+  const res = await authFetch("/api/providers");
+  return handleResponse<{ providers: Array<import("./types").Provider> }>(res);
+}
+
+export async function createProvider(data: {
+  name: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  specialty?: string;
+}): Promise<import("./types").Provider> {
+  const res = await authFetch("/api/providers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return handleResponse<import("./types").Provider>(res);
+}
+
+export async function updateProvider(
+  id: number,
+  data: {
+    name?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    specialty?: string;
+  }
+): Promise<import("./types").Provider> {
+  const res = await authFetch(`/api/providers/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return handleResponse<import("./types").Provider>(res);
+}
+
+export async function deleteProvider(id: number): Promise<void> {
+  const res = await authFetch(`/api/providers/${id}`, { method: "DELETE" });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || "Delete failed");
+  }
 }

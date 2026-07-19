@@ -66,7 +66,11 @@ router.get("/medications/:id/doses", (req: Request, res: Response) => {
 // GET /api/doses/today
 router.get("/doses/today", (req: Request, res: Response) => {
   const userId = getUserId(req);
-  const today = new Date().toISOString().slice(0, 10);
+  const dateParam = (req.query.date as string);
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  const today = (dateParam && dateRegex.test(dateParam))
+    ? dateParam
+    : new Date().toISOString().slice(0, 10);
   const doses = db
     .prepare(
       `SELECT d.*, m.name as medication_name, m.dosage as medication_dosage, m.frequency as medication_frequency
