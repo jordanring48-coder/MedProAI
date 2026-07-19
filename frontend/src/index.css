@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #2DE2A0;
+  --color-primary-dark: #24B882;
+  --color-health: #34D399;
+  --color-warning: #FBBF24;
+  --color-bg: #0A0A0B;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+  background-color: var(--color-bg);
+  color: #FAFAFA;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Monospace for numbers/data */
+.font-mono, .tabular-nums {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Bottom safe area for iOS */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.safe-bottom {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.safe-top {
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+}
+
+.h-screen-safe {
+  height: 100dvh;
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: rgba(22, 22, 24, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-card {
+  background: rgba(22, 22, 24, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(39, 39, 42, 0.6);
+}
+
+/* Glass nav — translucent bottom bar */
+.glass-nav {
+  background: rgba(10, 10, 11, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Subtle glow for accent buttons — mint */
+.btn-glow {
+  box-shadow: 0 0 20px rgba(45, 226, 160, 0.25), 0 0 4px rgba(45, 226, 160, 0.15);
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 30px rgba(45, 226, 160, 0.35), 0 0 8px rgba(45, 226, 160, 0.2);
+}
+
+/* Premium gradient border */
+.premium-border {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+.premium-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #FBBF24, #2DE2A0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Progress ring animation */
+@keyframes ring-fill {
+  from { stroke-dashoffset: var(--ring-circumference); }
+  to { stroke-dashoffset: var(--ring-offset); }
+}
+
+.ring-animate {
+  animation: ring-fill 1s ease-out forwards;
+}
+
+/* Drawer slide animation */
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes drawer-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes overlay-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.drawer-enter {
+  animation: drawer-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.drawer-exit {
+  animation: drawer-out 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.overlay-enter {
+  animation: overlay-in 0.3s ease-out forwards;
+}
+
+.overlay-exit {
+  animation: overlay-out 0.25s ease-out forwards;
+}
+
+/* Checkbox pop animation */
+@keyframes checkPop {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Collapse animation */
+@keyframes collapse-in {
+  from { max-height: 0; opacity: 0; }
+  to { max-height: 2000px; opacity: 1; }
+}
+
+@keyframes collapse-out {
+  from { max-height: 2000px; opacity: 1; }
+  to { max-height: 0; opacity: 0; }
+}
+
+.collapse-enter {
+  animation: collapse-in 0.35s ease-out forwards;
+  overflow: hidden;
+}
+
+.collapse-exit {
+  animation: collapse-out 0.25s ease-in forwards;
+  overflow: hidden;
+}
+
+/* Celebration animations */
+@keyframes ringPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes sparkleBurst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) translateY(-20px); }
+}
