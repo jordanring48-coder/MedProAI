@@ -14,12 +14,14 @@ import {
   createSymptom,
   createAppointment,
   scheduleDoses,
+  saveReport,
 } from "../api";
 import PremiumGate from "../components/PremiumGate";
 import AddEditMedicationModal from "../components/AddEditMedicationModal";
 import LogSymptomModal from "../components/LogSymptomModal";
 import AppointmentModal from "../components/AppointmentModal";
 import UserAvatar from "../components/UserAvatar";
+import { useTheme } from "../ThemeContext";
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -69,7 +71,7 @@ function renderMarkdown(text: string): string {
     if (inList) { result.push("</ul>"); inList = false; }
 
     if (trimmed === "---" || trimmed === "***" || trimmed === "___") {
-      result.push('<hr class="my-2 border-[#27272A]" />');
+      result.push('<hr class="my-2 border-[var(--bg-tertiary)]" />');
       continue;
     }
 
@@ -114,17 +116,18 @@ function SeverityDots({ severity }: { severity: number }) {
         return (
           <div
             key={level}
-            className={`w-2.5 h-2.5 rounded-full ${active ? color : "bg-[#3F3F46]"}`}
+            className={`w-2.5 h-2.5 rounded-full ${active ? color : "bg-[var(--bg-tertiary)]"}`}
           />
         );
       })}
-      <span className="text-xs text-[#A1A1AA] ml-1">{appSeverity}/5</span>
+      <span className="text-xs text-[var(--text-secondary)] ml-1">{appSeverity}/5</span>
     </div>
   );
 }
 
 export default function AssistantPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { theme } = useTheme();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -390,6 +393,14 @@ export default function AssistantPage() {
           userLabel = "Doctor visit report";
           const reportRes = await aiDoctorReport(30);
           responseText = reportRes.answer;
+          // Auto-save the report
+          try {
+            await saveReport({
+              title: `Doctor Visit Report — ${new Date().toLocaleDateString()}`,
+              content: responseText,
+              report_type: "doctor-report",
+            });
+          } catch {}
           break;
         }
         case "symptoms": {
@@ -452,7 +463,7 @@ export default function AssistantPage() {
 
     if (confirmed) {
       return (
-        <div className="text-sm text-[#A1A1AA] italic">Saving...</div>
+        <div className="text-sm text-[var(--text-secondary)] italic">Saving...</div>
       );
     }
 
@@ -498,28 +509,28 @@ export default function AssistantPage() {
             <div className="space-y-2">
               {d.name ? (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Name</span>
-                  <p className="text-sm font-medium text-[#FAFAFA]">{d.name}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Name</span>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{d.name}</p>
                 </div>
               ) : (
                 <p className="text-sm text-[#FBBF24]">⚠ Name missing — please edit to add one.</p>
               )}
               {d.dosage && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Dosage</span>
-                  <p className="text-sm text-[#A1A1AA]">{d.dosage}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Dosage</span>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.dosage}</p>
                 </div>
               )}
               {d.frequency && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Frequency</span>
-                  <p className="text-sm text-[#A1A1AA]">{d.frequency}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Frequency</span>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.frequency}</p>
                 </div>
               )}
               {d.instructions && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Instructions</span>
-                  <p className="text-sm text-[#A1A1AA]">{d.instructions}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Instructions</span>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.instructions}</p>
                 </div>
               )}
             </div>
@@ -531,22 +542,22 @@ export default function AssistantPage() {
             <div className="space-y-2">
               {d.name ? (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Symptom</span>
-                  <p className="text-sm font-medium text-[#FAFAFA]">{d.name}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Symptom</span>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{d.name}</p>
                 </div>
               ) : (
                 <p className="text-sm text-[#FBBF24]">⚠ Name missing — please edit to add one.</p>
               )}
               {d.severity ? (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Severity</span>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Severity</span>
                   <SeverityDots severity={d.severity} />
                 </div>
               ) : null}
               {d.notes && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Notes</span>
-                  <p className="text-sm text-[#A1A1AA]">{d.notes}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Notes</span>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.notes}</p>
                 </div>
               )}
             </div>
@@ -558,42 +569,42 @@ export default function AssistantPage() {
             <div className="space-y-2">
               {d.title ? (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Title</span>
-                  <p className="text-sm font-medium text-[#FAFAFA]">{d.title}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Title</span>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{d.title}</p>
                 </div>
               ) : (
                 <p className="text-sm text-[#FBBF24]">⚠ Title missing — please edit to add one.</p>
               )}
               {d.doctor_name && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Doctor</span>
-                  <p className="text-sm text-[#A1A1AA]">{d.doctor_name}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Doctor</span>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.doctor_name}</p>
                 </div>
               )}
               <div className="flex gap-4">
                 {d.date && (
                   <div>
-                    <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Date</span>
-                    <p className="text-sm text-[#A1A1AA]">{d.date}</p>
+                    <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Date</span>
+                    <p className="text-sm text-[var(--text-secondary)]">{d.date}</p>
                   </div>
                 )}
                 {d.time && (
                   <div>
-                    <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Time</span>
-                    <p className="text-sm text-[#A1A1AA]">{d.time}</p>
+                    <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Time</span>
+                    <p className="text-sm text-[var(--text-secondary)]">{d.time}</p>
                   </div>
                 )}
               </div>
               {d.location && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Location</span>
-                  <p className="text-sm text-[#A1A1AA]">{d.location}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Location</span>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.location}</p>
                 </div>
               )}
               {d.notes && (
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-[#71717A]">Notes</span>
-                  <p className="text-sm text-[#A1A1AA]">{d.notes}</p>
+                  <span className="text-[11px] uppercase tracking-wider text-[var(--text-secondary)]">Notes</span>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.notes}</p>
                 </div>
               )}
             </div>
@@ -603,7 +614,7 @@ export default function AssistantPage() {
     };
 
     return (
-      <div className="bg-[#151517] rounded-2xl border border-[#BC25F9]/30 p-4 w-full">
+      <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/30 p-4 w-full">
         {/* Header */}
         <div className="flex items-center gap-2 mb-3">
           <span className="text-[#BC25F9]">{getIcon()}</span>
@@ -611,7 +622,7 @@ export default function AssistantPage() {
         </div>
 
         {/* Edit hint */}
-        <p className="text-xs text-[#A1A1AA] mb-3">
+        <p className="text-xs text-[var(--text-secondary)] mb-3">
           Here's what I understood — confirm or edit:
         </p>
 
@@ -630,13 +641,13 @@ export default function AssistantPage() {
           </button>
           <button
             onClick={handleEdit}
-            className="flex-1 bg-transparent border border-[#3F3F46] text-[#A1A1AA] font-medium text-sm py-2.5 rounded-xl hover:border-[#71717A] hover:text-[#FAFAFA] active:scale-[0.97] transition-all"
+            className="flex-1 bg-transparent border border-[#3F3F46] text-[var(--text-secondary)] font-medium text-sm py-2.5 rounded-xl hover:border-[#71717A] hover:text-[var(--text-primary)] active:scale-[0.97] transition-all"
           >
             Edit
           </button>
           <button
             onClick={handleCancel}
-            className="px-4 text-[#71717A] text-sm font-medium hover:text-[#A1A1AA] active:scale-[0.97] transition-all"
+            className="px-4 text-[var(--text-secondary)] text-sm font-medium hover:text-[var(--text-secondary)] active:scale-[0.97] transition-all"
           >
             Cancel
           </button>
@@ -717,25 +728,18 @@ export default function AssistantPage() {
 
   return (
     <PremiumGate featureName="AI Assistant">
-    <div className="flex flex-col h-[calc(100dvh-5rem)] bg-[#0A0A0B]">
-      {/* Monica Header */}
-      <div className="relative border-b border-[#27272A] px-5 pt-12 pb-4 safe-top flex-shrink-0">
-        <div className="absolute right-5 top-3">
+    <div className="flex flex-col h-[calc(100dvh-5rem)] bg-[var(--bg-primary)]">
+      {/* App wordmark top bar */}
+      <div className="flex items-center justify-center pt-0 pb-1 px-5 relative">
+        <img src="/appheader.png" alt="MedTrack AI" className="h-9 object-contain" />
+        <div className="absolute right-5 top-0">
           <UserAvatar />
         </div>
-        <div className="flex items-center gap-3">
-          <img src="/monica-icon.png" alt="Monica AI" className="w-12 h-12 rounded-full object-cover shadow-[0_0_20px_rgba(188,37,249,0.2)]" />
-          <div>
-            <h1 className="text-xl font-bold text-[#FAFAFA] tracking-tight">Monica</h1>
-            <p className="text-xs text-[#A1A1AA]">Your AI health assistant</p>
-          </div>
-        </div>
       </div>
-
       {/* Medical disclaimer */}
-      <div className="flex-shrink-0 bg-[#FBBF24]/5 border-b border-[#FBBF24]/10 px-5 py-2 text-center">
-        <p className="text-[11px] text-[#FBBF24]/70 leading-relaxed">
-          Monica is an AI assistant and does not provide medical advice. Always consult your doctor or pharmacist.
+      <div className="flex-shrink-0 bg-[#FBBF24]/15 border-b border-[#FBBF24]/30 px-5 py-2.5 text-center safe-top">
+        <p className="text-xs text-[#FBBF24] font-medium leading-relaxed">
+          ⚠️ Monica is an AI assistant and does not provide medical advice. Always consult your doctor or pharmacist.
         </p>
       </div>
 
@@ -744,26 +748,28 @@ export default function AssistantPage() {
         {messages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             {/* Monica avatar */}
-            <img src="/monica-icon.png" alt="Monica AI" className="w-20 h-20 rounded-3xl object-cover mb-5 shadow-[0_0_40px_rgba(188,37,249,0.2)]" />
-            <h2 className="text-lg font-bold text-[#FAFAFA] mb-1.5 tracking-tight">
+            <img src={theme === "light" ? "/monica-icon-light.png" : "/monica-icon.png"} alt="Monica AI" className="w-24 h-24 rounded-3xl object-contain mb-5 shadow-[0_0_40px_rgba(188,37,249,0.2)]" />
+            <h2 className="text-lg font-bold text-[var(--text-primary)] mb-1.5 tracking-tight">
               Hi, I'm Monica
             </h2>
-            <p className="text-sm text-[#A1A1AA] mb-8 max-w-[260px] leading-relaxed">
+            <p className="text-sm text-[var(--text-secondary)] mb-8 max-w-[260px] leading-relaxed">
               Your personal health assistant. I can explain medications, spot patterns, and help you prepare for doctor visits.
             </p>
 
             {/* Quick action chips */}
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="w-full overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory touch-pan-x" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
+              <div className="flex gap-2 px-4 w-max">
               {quickActions.map((qa) => (
                 <button
                   key={qa.label}
                   onClick={qa.action}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-[#111113] rounded-xl border border-[#27272A] text-sm text-[#A1A1AA] hover:border-[#BC25F9]/40 hover:text-[#BC25F9] hover:bg-[#BC25F9]/5 transition-all active:scale-[0.97] duration-200"
+                  className="flex-shrink-0 snap-center flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-secondary)] rounded-xl border border-[var(--bg-tertiary)] text-sm text-[var(--text-secondary)] hover:border-[#BC25F9]/40 hover:text-[#BC25F9] hover:bg-[#BC25F9]/5 transition-all active:scale-[0.97] duration-200"
                 >
                   <span className="text-[#BC25F9]">{qa.icon}</span>
                   {qa.label}
                 </button>
               ))}
+              </div>
             </div>
           </div>
         )}
@@ -774,7 +780,7 @@ export default function AssistantPage() {
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.role === "assistant" && (
-              <img src="/monica-icon.png" alt="Monica" className="w-8 h-8 rounded-full object-cover flex-shrink-0 mr-2 mt-1" />
+              <img src={theme === "light" ? "/monica-icon-light.png" : "/monica-icon.png"} alt="Monica" className="w-10 h-10 rounded-full object-contain flex-shrink-0 mr-2 mt-1" />
             )}
             <div
               className={`${
@@ -782,7 +788,7 @@ export default function AssistantPage() {
               } rounded-2xl px-4 py-3 ${
                 msg.role === "user"
                   ? "bg-gradient-to-br from-[#BC25F9] to-[#A020F0] text-[#0A0A0B] rounded-br-md shadow-[0_4px_12px_rgba(188,37,249,0.2)]"
-                  : "bg-[#111113] text-[#FAFAFA] rounded-bl-md border border-[#27272A]"
+                  : "bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-bl-md border border-[var(--bg-tertiary)]"
               }`}
             >
               {msg.role === "assistant" && pendingAction && msg.id === pendingAction.messageId
@@ -797,7 +803,7 @@ export default function AssistantPage() {
               )}
               <p
                 className={`text-[10px] mt-1.5 ${
-                  msg.role === "user" ? "text-[#0A0A0B]/50" : "text-[#71717A]"
+                  msg.role === "user" ? "text-[#0A0A0B]/50" : "text-[var(--text-secondary)]"
                 }`}
               >
                 {new Date(msg.timestamp).toLocaleTimeString([], {
@@ -812,8 +818,8 @@ export default function AssistantPage() {
         {/* Loading indicator */}
         {loading && (
           <div className="flex justify-start">
-            <img src="/monica-icon.png" alt="Monica" className="w-8 h-8 rounded-full object-cover flex-shrink-0 mr-2 mt-1" />
-            <div className="bg-[#111113] rounded-2xl rounded-bl-md px-4 py-3 border border-[#27272A]">
+            <img src={theme === "light" ? "/monica-icon-light.png" : "/monica-icon.png"} alt="Monica" className="w-10 h-10 rounded-full object-contain flex-shrink-0 mr-2 mt-1" />
+            <div className="bg-[var(--bg-secondary)] rounded-2xl rounded-bl-md px-4 py-3 border border-[var(--bg-tertiary)]">
               <div className="flex gap-1.5 py-1">
                 <div className="w-2 h-2 bg-[#BC25F9] rounded-full animate-bounce [animation-delay:0ms]" />
                 <div className="w-2 h-2 bg-[#BC25F9] rounded-full animate-bounce [animation-delay:150ms]" />
@@ -834,7 +840,7 @@ export default function AssistantPage() {
               <button
                 key={qa.label}
                 onClick={qa.action}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[#111113] rounded-full border border-[#27272A] text-xs text-[#A1A1AA] hover:border-[#BC25F9]/40 hover:text-[#BC25F9] transition-all active:scale-[0.97]"
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-secondary)] rounded-full border border-[var(--bg-tertiary)] text-xs text-[var(--text-secondary)] hover:border-[#BC25F9]/40 hover:text-[#BC25F9] transition-all active:scale-[0.97]"
               >
                 <span className="text-[#BC25F9]">{qa.icon}</span>
                 {qa.label}
@@ -845,7 +851,7 @@ export default function AssistantPage() {
       )}
 
       {/* Input area */}
-      <div className="flex-shrink-0 border-t border-[#27272A] px-4 py-3 safe-bottom">
+      <div className="flex-shrink-0 border-t border-[var(--bg-tertiary)] px-4 py-3 safe-bottom">
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
@@ -854,12 +860,13 @@ export default function AssistantPage() {
             onKeyDown={handleKeyDown}
             placeholder="Ask Monica anything..."
             rows={1}
-            className="flex-1 resize-none bg-[#111113] rounded-2xl px-4 py-3 text-sm text-[#FAFAFA] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/30 min-h-[44px] max-h-32 transition-shadow"
+            className="flex-1 resize-none bg-[var(--bg-secondary)] rounded-2xl px-4 py-3 text-base text-[var(--text-primary)] placeholder-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/30 min-h-[44px] max-h-32 transition-shadow"
+            style={{ fontSize: "16px" }}
             disabled={loading}
           />
           {/* Voice button (placeholder) */}
           <button
-            className="w-[44px] h-[44px] flex items-center justify-center bg-[#151517] text-[#71717A] rounded-2xl hover:bg-[#27272A] active:scale-[0.95] transition-all flex-shrink-0"
+            className="w-[44px] h-[44px] flex items-center justify-center bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-2xl hover:bg-[var(--bg-tertiary)] active:scale-[0.95] transition-all flex-shrink-0"
             aria-label="Voice input"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">

@@ -197,6 +197,28 @@ export interface AppointmentFormData {
   notes: string;
 }
 
+export interface Allergy {
+  id: number;
+  name: string;
+}
+
+export interface Provider {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  specialty: string;
+}
+
+export interface SavedReport {
+  id: number;
+  title: string;
+  content: string;
+  report_type: string;
+  created_at: string;
+}
+
 export interface PremiumState {
   active: boolean;
   upgradedAt: string;

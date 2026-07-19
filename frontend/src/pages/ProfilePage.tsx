@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { AdherenceStats, Allergy, Appointment, Medication, Provider } from "../types";
+import type { AdherenceStats, Allergy, Appointment, Medication, Provider, SavedReport } from "../types";
 import { getRefillStatus, getRefillLabel } from "../types";
 import {
   fetchAdherenceStats,
@@ -15,6 +15,7 @@ import {
   createProvider,
   updateProvider,
   deleteProvider,
+  fetchReports,
 } from "../api";
 import { useAuth } from "../AuthContext";
 import { useTheme } from "../ThemeContext";
@@ -89,6 +90,8 @@ export default function ProfilePage() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [showProviderForm, setShowProviderForm] = useState(false);
   const [newProvider, setNewProvider] = useState({ name: "", phone: "", email: "", address: "", specialty: "" });
+  const [reports, setReports] = useState<SavedReport[]>([]);
+  const [selectedReport, setSelectedReport] = useState<SavedReport | null>(null);
 
   const loadAll = async () => {
     try {
@@ -132,6 +135,16 @@ export default function ProfilePage() {
       } catch {}
     };
     loadProviders();
+  }, []);
+
+  useEffect(() => {
+    const loadReports = async () => {
+      try {
+        const data = await fetchReports();
+        setReports(data.reports);
+      } catch {}
+    };
+    loadReports();
   }, []);
 
   const handleDeleteAppointment = async (id: number) => {
@@ -411,6 +424,38 @@ export default function ProfilePage() {
             >
               Save Provider
             </button>
+          </div>
+        )}
+      </div>
+
+      {/* Reports */}
+      <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 p-5 mb-4">
+        <div className="flex items-center gap-2 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#F59E0B" className="w-5 h-5">
+            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
+          </svg>
+          <h2 className="text-[17px] font-semibold text-[var(--text-primary)]">Reports</h2>
+        </div>
+        {reports.length === 0 ? (
+          <p className="text-sm text-[var(--text-secondary)] text-center py-2">No reports yet. Generate one with Monica AI.</p>
+        ) : (
+          <div className="space-y-2">
+            {reports.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => setSelectedReport(r)}
+                className="w-full text-left bg-[var(--bg-primary)] rounded-xl p-4 hover:bg-[var(--bg-tertiary)] transition-colors"
+              >
+                <p className="text-[15px] font-medium text-[var(--text-primary)]">{r.title}</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  {new Date(r.created_at + "Z").toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -702,6 +747,40 @@ export default function ProfilePage() {
           onClose={() => { setShowAppointmentModal(false); setEditingAppointment(null); }}
           onSaved={handleAppointmentSaved}
         />
+      )}
+
+      {/* Report Detail Modal */}
+      {selectedReport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 max-w-lg w-full max-h-[80vh] flex flex-col shadow-2xl">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-[var(--bg-tertiary)] flex-shrink-0">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)]">{selectedReport.title}</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-1">
+                {new Date(selectedReport.created_at + "Z").toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-5">
+              <div className="text-sm text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
+                {selectedReport.content}
+              </div>
+            </div>
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-[var(--bg-tertiary)] flex-shrink-0">
+              <button
+                onClick={() => setSelectedReport(null)}
+                className="w-full bg-[#BC25F9] text-white font-medium text-sm py-2.5 rounded-xl hover:bg-[#A020F0] active:scale-[0.97] transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <p className="text-center text-xs text-[var(--text-secondary)] mt-8">Luna v0.3.0</p>

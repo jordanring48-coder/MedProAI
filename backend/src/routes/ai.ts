@@ -372,6 +372,16 @@ Keep it under 500 words. Use a clear, professional yet patient-friendly tone.`;
     temperature: 0.3,
   });
 
+  // Auto-save the report
+  const title = `Doctor Visit Report — ${new Date().toLocaleDateString()}`;
+  try {
+    db.prepare(
+      "INSERT INTO reports (user_id, title, content, report_type) VALUES (?, ?, ?, ?)"
+    ).run(userId, title, answer, "doctor-report");
+  } catch {
+    // Silently fail — don't break the response if save fails
+  }
+
   res.json({
     answer,
     data: {

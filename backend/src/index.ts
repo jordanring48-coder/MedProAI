@@ -13,6 +13,9 @@ import aiRouter from "./routes/ai.js";
 import appointmentsRouter from "./routes/appointments.js";
 import drugRoutes from "./routes/drugs.js";
 import profileRouter from "./routes/profile.js";
+import allergiesRouter from "./routes/allergies.js";
+import providersRouter from "./routes/providers.js";
+import reportsRouter from "./routes/reports.js";
 
 const app = express();
 const PORT = process.env.MEDCHRON_PORT ? parseInt(process.env.MEDCHRON_PORT) : 3001;
@@ -57,6 +60,9 @@ app.use("/api/medications", medicationsRouter);
 app.use("/api/appointments", appointmentsRouter);
 app.use("/api", drugRoutes);
 app.use("/api", authMiddleware, profileRouter);
+app.use("/api", authMiddleware, allergiesRouter);
+app.use("/api", authMiddleware, providersRouter);
+app.use("/api", reportsRouter);
 
 // ── SPA fallback (after auth middleware — but auth skips non-/api/ paths) ──
 if (STATIC_DIR) {

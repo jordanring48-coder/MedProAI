@@ -88,6 +88,45 @@ db.exec(`
   )
 `);
 
+// ── Allergies ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS allergies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )
+`);
+
+// ── Providers ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS providers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT DEFAULT '',
+    email TEXT DEFAULT '',
+    address TEXT DEFAULT '',
+    specialty TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )
+`);
+
+// ── Reports ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    report_type TEXT NOT NULL DEFAULT 'doctor-report',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )
+`);
+
 // ── Migrations: add columns if they don't exist (idempotent) ──
 
 // user_id columns
@@ -138,6 +177,9 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_appointments_user_id ON appointments(user_id);
   CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date);
   CREATE INDEX IF NOT EXISTS idx_appointments_user_date ON appointments(user_id, date);
+  CREATE INDEX IF NOT EXISTS idx_allergies_user_id ON allergies(user_id);
+  CREATE INDEX IF NOT EXISTS idx_providers_user_id ON providers(user_id);
+  CREATE INDEX IF NOT EXISTS idx_reports_user_id ON reports(user_id);
 `);
 
 export default db;
