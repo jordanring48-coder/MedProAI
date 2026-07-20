@@ -92,6 +92,7 @@ export default function ProfilePage() {
   const [newProvider, setNewProvider] = useState({ name: "", phone: "", email: "", address: "", specialty: "" });
   const [reports, setReports] = useState<SavedReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<SavedReport | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const loadAll = async () => {
     try {
@@ -772,12 +773,72 @@ export default function ProfilePage() {
             </div>
             {/* Modal Footer */}
             <div className="p-4 border-t border-[var(--bg-tertiary)] flex-shrink-0">
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="w-full bg-[#BC25F9] text-white font-medium text-sm py-2.5 rounded-xl hover:bg-[#A020F0] active:scale-[0.97] transition-all"
-              >
-                Close
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (!selectedReport.content) return;
+                    const blob = new Blob([selectedReport.content], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    const date = new Date(selectedReport.created_at + "Z").toISOString().split("T")[0];
+                    a.href = url;
+                    a.download = `report-${date}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  disabled={!selectedReport.content}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium text-sm py-2.5 rounded-xl hover:brightness-110 active:scale-[0.97] transition-all disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!selectedReport.content) return;
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({
+                          title: selectedReport.title,
+                          text: selectedReport.content.substring(0, 200) + "...",
+                        });
+                      } catch {
+                        // user cancelled — do nothing
+                      }
+                    } else {
+                      try {
+                        await navigator.clipboard.writeText(selectedReport.content);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      } catch {
+                        // clipboard error — do nothing
+                      }
+                    }
+                  }}
+                  disabled={!selectedReport.content}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-[var(--bg-tertiary)] text-[var(--text-primary)] font-medium text-sm py-2.5 rounded-xl hover:brightness-110 active:scale-[0.97] transition-all disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  {copied ? (
+                    "Copied!"
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                      Share
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setSelectedReport(null)}
+                  className="flex-1 bg-[#BC25F9] text-white font-medium text-sm py-2.5 rounded-xl hover:bg-[#A020F0] active:scale-[0.97] transition-all"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
