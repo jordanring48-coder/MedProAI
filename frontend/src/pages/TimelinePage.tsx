@@ -91,7 +91,7 @@ function SeverityBar({ severity }: { severity: number }) {
           key={level}
           className="h-1.5 w-4 rounded-full transition-colors"
           style={{
-            backgroundColor: level <= severity ? colors[severity - 1] : "#27272A",
+            backgroundColor: level <= severity ? colors[severity - 1] : "var(--bg-tertiary)",
           }}
         />
       ))}

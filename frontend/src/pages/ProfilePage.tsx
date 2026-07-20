@@ -237,7 +237,7 @@ export default function ProfilePage() {
                 key={colorName}
                 onClick={() => handleAvatarColor(colorName)}
                 className={`w-10 h-10 rounded-full transition-all duration-200 active:scale-95 ${
-                  isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-[#111113]" : ""
+                  isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-[var(--bg-secondary)]" : ""
                 }`}
                 style={{
                   background: `linear-gradient(135deg, ${grad.from}, ${grad.to})`,

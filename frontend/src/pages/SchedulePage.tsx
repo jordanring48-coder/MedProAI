@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import type { Dose, Appointment } from "../types";
 import { fetchDoseHistory, fetchUpcomingAppointments } from "../api";
 import usePremium from "../hooks/usePremium";
+import { useTheme } from "../ThemeContext";
 import UserAvatar from "../components/UserAvatar";
 import DoseEditModal from "../components/DoseEditModal";
+import AppointmentModal from "../components/AppointmentModal";
 import { formatTime12h } from "../utils";
 
 function localDateStr(d: Date): string {
@@ -39,11 +41,14 @@ type ScheduleItem = DoseItem | AppointmentItem;
 
 export default function SchedulePage() {
   const { isPremium } = usePremium();
+  const { theme } = useTheme();
   const today = localDateStr(new Date());
   const [selectedDate, setSelectedDate] = useState(today);
   const [dosesByDate, setDosesByDate] = useState<Record<string, Dose[]>>({});
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const stripRef = useRef<HTMLDivElement>(null);
 
   const loadData = async () => {
@@ -68,18 +73,16 @@ export default function SchedulePage() {
       setDosesByDate(grouped);
     } catch {}
 
-    if (isPremium) {
-      try {
-        const appts = await fetchUpcomingAppointments();
-        setAppointments(appts);
-      } catch {}
-    }
+    try {
+      const appts = await fetchUpcomingAppointments();
+      setAppointments(appts);
+    } catch {}
     setLoading(false);
   };
 
   useEffect(() => {
     loadData();
-  }, [isPremium]);
+  }, []);
 
   // Generate 7-day date strip: 3 before today, today, 3 after
   const dateStrip = Array.from({ length: 7 }, (_, i) => {
@@ -138,13 +141,13 @@ export default function SchedulePage() {
     <div className="pb-28 min-h-screen">
       {/* App wordmark top bar */}
       <div className="flex items-center justify-center pt-0 pb-1 px-5 relative">
-        <img src="/appheader.png" alt="MedTrack AI" className="h-9 object-contain" />
+        <img src={theme === "dark" ? "/appheader.png" : "/101.png"} alt="MedTrack AI" className="h-9 object-contain" />
         <div className="absolute right-5 top-0">
           <UserAvatar />
         </div>
       </div>
       {/* Header */}
-      <div className="relative bg-gradient-to-b from-[#BC25F9]/20 to-transparent pt-0 pb-4 px-5">
+      <div className="relative pt-0 pb-4 px-5">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -155,6 +158,12 @@ export default function SchedulePage() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">Schedule</h1>
+          <button
+            onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
+            className="bg-[#BC25F9] text-white rounded-xl px-4 py-2 font-medium text-sm ml-auto"
+          >
+            + Add
+          </button>
         </div>
         <p className="text-[15px] text-[var(--text-secondary)] mt-1.5 ml-[42px]">Your dose schedule & appointments</p>
       </div>
@@ -209,12 +218,12 @@ export default function SchedulePage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-[#111113] rounded-3xl p-5 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]"
+              className="bg-[var(--bg-secondary)] rounded-3xl p-5 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]"
             >
-              <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
+              <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24 mb-4" />
               <div className="space-y-2">
-                <div className="h-3 bg-[#27272A] rounded w-full" />
-                <div className="h-3 bg-[#151517] rounded w-3/4" />
+                <div className="h-3 bg-[var(--bg-tertiary)] rounded w-full" />
+                <div className="h-3 bg-[var(--bg-tertiary)] rounded w-3/4" />
               </div>
             </div>
           ))}
@@ -225,7 +234,7 @@ export default function SchedulePage() {
       {!loading && (
         <div className="space-y-4">
           {visibleBuckets.length === 0 ? (
-            <div className="bg-[#111113] rounded-3xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+            <div className="bg-[var(--bg-secondary)] rounded-3xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="w-16 h-16 bg-[#BC25F9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -251,17 +260,17 @@ export default function SchedulePage() {
             visibleBuckets.map((bucket) => (
               <div
                 key={bucket.label}
-                className="bg-[#111113] rounded-3xl border border-[#BC25F9]/25 overflow-hidden transition-opacity duration-300 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
+                className="bg-[var(--bg-secondary)] rounded-3xl border border-[#BC25F9]/25 overflow-hidden transition-opacity duration-300 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
               >
                 {/* Time-of-day header */}
-                <div className="px-5 py-2.5 bg-[#151517]/60">
+                <div className="px-5 py-2.5 bg-[var(--bg-tertiary)]">
                   <span className="text-[var(--text-secondary)] text-xs font-semibold uppercase tracking-wider">
                     {bucket.label}
                   </span>
                 </div>
 
                 {/* Items */}
-                <div className="divide-y divide-[#27272A]">
+                <div className="divide-y divide-[var(--bg-tertiary)]">
                   {bucket.items.map((item, idx) => {
                     if (item.kind === "dose") {
                       return <DoseRow key={`dose-${item.dose.id}`} dose={item.dose} onDoseUpdate={loadData} />;
@@ -282,6 +291,15 @@ export default function SchedulePage() {
         </div>
       )}
       </div>
+
+      {/* Appointment Modal */}
+      {showAppointmentModal && (
+        <AppointmentModal
+          appointment={editingAppointment}
+          onClose={() => { setShowAppointmentModal(false); setEditingAppointment(null); }}
+          onSaved={() => { setShowAppointmentModal(false); setEditingAppointment(null); loadData(); }}
+        />
+      )}
     </div>
   );
 }
@@ -308,7 +326,7 @@ function DoseRow({ dose, onDoseUpdate }: { dose: Dose; onDoseUpdate: () => void 
   return (
     <>
       <div
-        className="px-5 py-3.5 flex items-center gap-3 cursor-pointer active:bg-[#151517]/60"
+        className="px-5 py-3.5 flex items-center gap-3 cursor-pointer active:bg-[var(--bg-tertiary)]"
         onClick={() => setShowEdit(true)}
       >
         {/* Status dot */}

@@ -1,3 +1,4 @@
+import { formatTime12h } from "../utils";
 import { useEffect, useRef } from "react";
 import type { Dose } from "../types";
 
@@ -48,7 +49,7 @@ export default function DoseConfirmPopup({
       </p>
       {/* Scheduled time */}
       <p className="text-xs text-[var(--text-secondary)] mb-3">
-        Scheduled: {dose.scheduled_time}
+        Scheduled: {formatTime12h(dose.scheduled_time)}
       </p>
 
       {/* Buttons row */}
@@ -76,7 +77,7 @@ export default function DoseConfirmPopup({
             e.stopPropagation();
             onCancel();
           }}
-          className="flex-1 py-2 px-3 bg-[#27272A] text-[var(--text-secondary)] text-sm font-medium rounded-xl hover:bg-[#3F3F46] active:scale-[0.97] transition-all duration-150"
+          className="flex-1 py-2 px-3 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] text-sm font-medium rounded-xl hover:bg-[#3F3F46] active:scale-[0.97] transition-all duration-150"
         >
           Cancel
         </button>

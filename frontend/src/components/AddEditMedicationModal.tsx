@@ -66,6 +66,94 @@ const QUANTITY_OPTIONS = [
 
 const QUANTITY_PRESET_VALUES = QUANTITY_OPTIONS.filter(p => p.value !== "__other__" && p.value !== "").map(p => p.value);
 
+// ── Route detection & dynamic dosage/quantity presets ──
+
+function detectRoute(strengthName: string): string {
+  const lower = strengthName.toLowerCase();
+  if (lower.includes("insulin")) return "insulin";
+  if (lower.includes("injectable") || lower.includes("injection")) return "injectable";
+  if (lower.includes("inhaler") || lower.includes("inhalation") || lower.includes("aerosol") || lower.includes("spray")) return "inhaler";
+  if (lower.includes("solution") || lower.includes("suspension") || lower.includes("syrup") || lower.includes("elixir") || lower.includes("liquid") || lower.includes("drop")) return "liquid";
+  if (lower.includes("cream") || lower.includes("ointment") || lower.includes("gel") || lower.includes("patch") || lower.includes("topical")) return "topical";
+  return "solid";
+}
+
+const LIQUID_DOSAGE_PRESETS: Array<{ value: string; label: string }> = [
+  { value: "", label: "Select dosage..." },
+  { value: "1mL", label: "1mL" },
+  { value: "2mL", label: "2mL" },
+  { value: "5mL", label: "5mL" },
+  { value: "10mL", label: "10mL" },
+  { value: "20mL", label: "20mL" },
+  { value: "50mL", label: "50mL" },
+  { value: "100mL", label: "100mL" },
+  { value: "__other__", label: "Other..." },
+];
+
+const INSULIN_DOSAGE_PRESETS: Array<{ value: string; label: string }> = [
+  { value: "", label: "Select dosage..." },
+  { value: "1 unit", label: "1 unit" },
+  { value: "2 units", label: "2 units" },
+  { value: "5 units", label: "5 units" },
+  { value: "10 units", label: "10 units" },
+  { value: "20 units", label: "20 units" },
+  { value: "50 units", label: "50 units" },
+  { value: "100 units", label: "100 units" },
+  { value: "__other__", label: "Other..." },
+];
+
+const INHALER_DOSAGE_PRESETS: Array<{ value: string; label: string }> = [
+  { value: "", label: "Select dosage..." },
+  { value: "1 puff", label: "1 puff" },
+  { value: "2 puffs", label: "2 puffs" },
+  { value: "__other__", label: "Other..." },
+];
+
+function getDosagePresets(route: string): Array<{ value: string; label: string }> {
+  switch (route) {
+    case "injectable":
+    case "liquid":
+      return LIQUID_DOSAGE_PRESETS;
+    case "insulin":
+      return INSULIN_DOSAGE_PRESETS;
+    case "inhaler":
+      return INHALER_DOSAGE_PRESETS;
+    case "topical":
+    case "solid":
+    default:
+      return DOSAGE_PRESETS;
+  }
+}
+
+const LIQUID_QUANTITY_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "", label: "Select quantity..." },
+  { value: "100ml", label: "100ml" },
+  { value: "200ml", label: "200ml" },
+  { value: "500ml", label: "500ml" },
+  { value: "__other__", label: "Other..." },
+];
+
+const INHALER_QUANTITY_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "", label: "Select quantity..." },
+  { value: "1 inhaler", label: "1 inhaler" },
+  { value: "2 inhalers", label: "2 inhalers" },
+  { value: "__other__", label: "Other..." },
+];
+
+function getQuantityPresets(route: string): Array<{ value: string; label: string }> {
+  switch (route) {
+    case "injectable":
+    case "liquid":
+    case "insulin":
+      return LIQUID_QUANTITY_OPTIONS;
+    case "inhaler":
+      return INHALER_QUANTITY_OPTIONS;
+    case "topical":
+    default:
+      return QUANTITY_OPTIONS;
+  }
+}
+
 // Parse frequency text to determine how many reminder time inputs to show
 function getReminderSlotCount(frequency: string): number {
   const f = frequency.trim();
@@ -102,7 +190,7 @@ function getDefaultTimes(count: number): string[] {
 
 // Shared dark-theme select styles (reused across frequency & dosage selects)
 const selectClasses =
-  "w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow appearance-none cursor-pointer";
+  "w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-xl text-[17px] text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow appearance-none cursor-pointer";
 
 const selectErrorClasses = "ring-2 ring-[#F87171]";
 
@@ -147,6 +235,9 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
   const [strengthOptions, setStrengthOptions] = useState<Array<{ name: string; rxcui: string; tty: string }>>([]);
   const [showStrengthPicker, setShowStrengthPicker] = useState(false);
 
+  // ── Route detection for dynamic dosage/quantity presets ──
+  const [detectedRoute, setDetectedRoute] = useState<string>("solid");
+
   // Dosage: track whether "Other..." is selected and the custom text
   const [isCustomDosage, setIsCustomDosage] = useState(false);
   const [customDosageText, setCustomDosageText] = useState("");
@@ -154,6 +245,12 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
   // Quantity: track whether "Other..." is selected and the custom text
   const [isCustomQuantity, setIsCustomQuantity] = useState(false);
   const [customQuantityText, setCustomQuantityText] = useState("");
+
+  // ── Dynamic presets based on detected route ──
+  const activeDosagePresets = getDosagePresets(detectedRoute);
+  const activeDosagePresetValues = activeDosagePresets.filter(p => p.value !== "__other__" && p.value !== "").map(p => p.value);
+  const activeQuantityOptions = getQuantityPresets(detectedRoute);
+  const activeQuantityPresetValues = activeQuantityOptions.filter(p => p.value !== "__other__" && p.value !== "").map(p => p.value);
 
   useEffect(() => {
     if (medication) {
@@ -169,12 +266,12 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
       });
 
       // Determine if dosage is a custom value (not in presets)
-      const dosageIsPreset = DOSAGE_PRESET_VALUES.includes(medication.dosage);
+      const dosageIsPreset = activeDosagePresetValues.includes(medication.dosage);
       setIsCustomDosage(!dosageIsPreset && medication.dosage !== "");
       setCustomDosageText(dosageIsPreset || !medication.dosage ? "" : medication.dosage);
 
       // Determine if quantity is a custom value (not in presets)
-      const quantityIsPreset = QUANTITY_PRESET_VALUES.includes(medication.quantity || "");
+      const quantityIsPreset = activeQuantityPresetValues.includes(medication.quantity || "");
       setIsCustomQuantity(!quantityIsPreset && (medication.quantity || "") !== "");
       setCustomQuantityText(quantityIsPreset || !medication.quantity ? "" : medication.quantity || "");
 
@@ -200,10 +297,10 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
         reminder_times: null,
       });
       const freq = initialValues.frequency || "";
-      const dosageIsPreset = DOSAGE_PRESET_VALUES.includes(initialValues.dosage || "");
+      const dosageIsPreset = activeDosagePresetValues.includes(initialValues.dosage || "");
       setIsCustomDosage(!dosageIsPreset && (initialValues.dosage || "") !== "");
       setCustomDosageText(dosageIsPreset || !initialValues.dosage ? "" : initialValues.dosage || "");
-      const quantityIsPreset2 = QUANTITY_PRESET_VALUES.includes(initialValues.quantity || "");
+      const quantityIsPreset2 = activeQuantityPresetValues.includes(initialValues.quantity || "");
       setIsCustomQuantity(!quantityIsPreset2 && (initialValues.quantity || "") !== "");
       setCustomQuantityText(quantityIsPreset2 || !initialValues.quantity ? "" : initialValues.quantity || "");
       setReminderTimes(getDefaultTimes(getReminderSlotCount(freq)));
@@ -340,7 +437,12 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
         const dosageMatch = strength.name.match(/(\d+\s*(MG|MCG|G|ML|%))/i);
         if (dosageMatch) {
           const extracted = dosageMatch[1].toUpperCase();
-          if (DOSAGE_PRESET_VALUES.includes(extracted)) {
+          // Detect route for dynamic presets BEFORE checking if dosage is in preset values
+          const route = detectRoute(strength.name);
+          setDetectedRoute(route);
+          const presetsForRoute = getDosagePresets(route);
+          const presetValuesForRoute = presetsForRoute.filter(p => p.value !== "__other__" && p.value !== "").map(p => p.value);
+          if (presetValuesForRoute.includes(extracted)) {
             setField("dosage", extracted);
             setIsCustomDosage(false);
             setCustomDosageText("");
@@ -349,6 +451,9 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
             setCustomDosageText(extracted);
             setField("dosage", extracted);
           }
+        } else {
+          // Still detect route even if no dosage match
+          setDetectedRoute(detectRoute(strength.name));
         }
       }
     } catch {
@@ -366,11 +471,17 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
   };
 
   const selectStrength = async (strength: { name: string; rxcui: string; tty: string }) => {
+    // Detect route from strength name for dynamic presets
+    const route = detectRoute(strength.name);
+    setDetectedRoute(route);
+    const presetsForRoute = getDosagePresets(route);
+    const presetValuesForRoute = presetsForRoute.filter(p => p.value !== "__other__" && p.value !== "").map(p => p.value);
+
     // Parse dosage from strength name: e.g. "Advil 200 MG Oral Tablet" → "200 MG"
     const dosageMatch = strength.name.match(/(\d+\s*(MG|MCG|G|ML|%))/i);
     if (dosageMatch) {
       const extracted = dosageMatch[1].toUpperCase();
-      if (DOSAGE_PRESET_VALUES.includes(extracted)) {
+      if (presetValuesForRoute.includes(extracted)) {
         setField("dosage", extracted);
         setIsCustomDosage(false);
         setCustomDosageText("");
@@ -506,10 +617,10 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
   }
 
   // Determine which dosage select value to show
-  const dosageSelectValue = isCustomDosage ? "__other__" : (DOSAGE_PRESET_VALUES.includes(form.dosage) ? form.dosage : "");
+  const dosageSelectValue = isCustomDosage ? "__other__" : (activeDosagePresetValues.includes(form.dosage) ? form.dosage : "");
 
   // Determine which quantity select value to show
-  const quantitySelectValue = isCustomQuantity ? "__other__" : (QUANTITY_PRESET_VALUES.includes(form.quantity) ? form.quantity : "");
+  const quantitySelectValue = isCustomQuantity ? "__other__" : (activeQuantityPresetValues.includes(form.quantity) ? form.quantity : "");
 
   return (
     <div
@@ -517,16 +628,16 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
       onClick={handleOverlayClick}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm animate-in"
     >
-      <div className="bg-[#111113] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-xl animate-slide-up border border-[#27272A]">
+      <div className="bg-[var(--bg-secondary)] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-xl animate-slide-up border border-[#BC25F9]/25">
         {/* Header */}
-        <div className="sticky top-0 bg-[#111113] rounded-t-3xl px-6 pt-6 pb-4 border-b border-[#27272A] flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-[var(--bg-secondary)] rounded-t-3xl px-6 pt-6 pb-4 border-b border-[#BC25F9]/25 flex items-center justify-between z-10">
           <button
             onClick={onClose}
             className="text-[#BC25F9] font-medium text-[17px] hover:opacity-80"
           >
             Cancel
           </button>
-          <h2 className="text-[17px] font-semibold text-[#FAFAFA]">
+          <h2 className="text-[17px] font-semibold text-[var(--text-primary)]">
             {isEdit ? "Edit Medication" : "New Medication"}
           </h2>
           <div className="w-[60px]" />
@@ -536,7 +647,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
         <form onSubmit={handleSave} className="px-6 py-4 space-y-5">
           {/* Name — with RxNorm autocomplete */}
           <div className="relative">
-            <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
               Medication Name <span className="text-[#F87171]">*</span>
             </label>
             <input
@@ -549,7 +660,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               onFocus={handleNameFocus}
               placeholder="e.g. Lisinopril"
               autoComplete="off"
-              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow ${
+              className={`w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-xl text-[17px] text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow ${
                 showSuggestions && suggestions.length > 0 ? "rounded-b-none" : ""
               } ${getError("name") ? "ring-2 ring-[#F87171]" : ""}`}
               autoFocus
@@ -557,9 +668,9 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
             {/* Autocomplete dropdown */}
             {showSuggestions && (
-              <div className="absolute left-0 right-0 top-full z-20 bg-[#151517] border border-[#27272A] rounded-b-xl shadow-2xl max-h-56 overflow-y-auto">
+              <div className="absolute left-0 right-0 top-full z-20 bg-[var(--bg-secondary)] border border-[#BC25F9]/25 rounded-b-xl shadow-2xl max-h-56 overflow-y-auto">
                 {searching && suggestions.length === 0 && (
-                  <div className="px-4 py-3 text-sm text-[#71717A] flex items-center gap-2">
+                  <div className="px-4 py-3 text-sm text-[var(--text-secondary)] flex items-center gap-2">
                     <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -568,7 +679,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                   </div>
                 )}
                 {!searching && suggestions.length === 0 && !searchError && (
-                  <div className="px-4 py-3 text-sm text-[#71717A]">
+                  <div className="px-4 py-3 text-sm text-[var(--text-secondary)]">
                     No matches found — enter manually
                   </div>
                 )}
@@ -592,10 +703,10 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                         : "hover:bg-[#BC25F9]/5"
                     }`}
                   >
-                    <span className="text-[15px] text-[#FAFAFA] font-medium truncate mr-2">
-                      {s.name}
+                    <span className="text-[15px] text-[var(--text-primary)] font-medium truncate mr-2">
+                      {s.name.toUpperCase()}
                     </span>
-                    <span className="text-xs text-[#71717A] shrink-0">
+                    <span className="text-xs text-[var(--text-secondary)] shrink-0">
                       {TTY_LABELS[s.tty] || s.tty}
                     </span>
                   </button>
@@ -609,7 +720,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                 <button
                   type="button"
                   onClick={dismissDrugInfo}
-                  className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-[#71717A] hover:text-[#FAFAFA] hover:bg-[#27272A] transition-colors"
+                  className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M1 1l10 10M11 1L1 11" />
@@ -617,20 +728,20 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                 </button>
                 <div className="space-y-1.5 text-sm pr-6">
                   {drugInfo.drugClass && (
-                    <p className="text-[#A1A1AA]">
-                      <span className="text-[#FAFAFA] font-medium">Class:</span>{" "}
+                    <p className="text-[var(--text-secondary)]">
+                      <span className="text-[var(--text-primary)] font-medium">Class:</span>{" "}
                       {drugInfo.drugClass}
                     </p>
                   )}
                   {drugInfo.manufacturer && (
-                    <p className="text-[#A1A1AA]">
-                      <span className="text-[#FAFAFA] font-medium">Manufacturer:</span>{" "}
+                    <p className="text-[var(--text-secondary)]">
+                      <span className="text-[var(--text-primary)] font-medium">Manufacturer:</span>{" "}
                       {drugInfo.manufacturer}
                     </p>
                   )}
                   {drugInfo.indications && (
-                    <p className="text-[#A1A1AA]">
-                      <span className="text-[#FAFAFA] font-medium">Use:</span>{" "}
+                    <p className="text-[var(--text-secondary)]">
+                      <span className="text-[var(--text-primary)] font-medium">Use:</span>{" "}
                       {drugInfo.indications.length > 150
                         ? drugInfo.indications.slice(0, 150) + "..."
                         : drugInfo.indications}
@@ -649,7 +760,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                     </div>
                   )}
                   {drugInfo.source === "none" && drugInfo.error && (
-                    <p className="text-[#71717A] text-xs italic">
+                    <p className="text-[var(--text-secondary)] text-xs italic">
                       Drug info unavailable — you can still add this medication
                     </p>
                   )}
@@ -659,8 +770,8 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
             {/* Strength picker — shown when drug has multiple strengths */}
             {showStrengthPicker && strengthOptions.length > 0 && (
-              <div className="mt-2 bg-[#151517] rounded-xl p-3 border border-[#27272A]">
-                <p className="text-[#71717A] text-xs font-semibold uppercase tracking-wider mb-2">
+              <div className="mt-2 bg-[var(--bg-secondary)] rounded-xl p-3 border border-[#BC25F9]/25">
+                <p className="text-[var(--text-secondary)] text-xs font-semibold uppercase tracking-wider mb-2">
                   Select strength
                 </p>
                 <div className="space-y-0.5 max-h-48 overflow-y-auto">
@@ -671,11 +782,11 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                       onClick={() => selectStrength(s)}
                       className="w-full text-left px-3 py-2.5 flex items-center gap-3 rounded-lg hover:bg-[#BC25F9]/5 transition-colors group"
                     >
-                      <span className="w-4 h-4 rounded-full border-2 border-[#3F3F46] flex items-center justify-center shrink-0 group-hover:border-[#BC25F9]">
+                      <span className="w-4 h-4 rounded-full border-2 border-[var(--bg-tertiary)] flex items-center justify-center shrink-0 group-hover:border-[#BC25F9]">
                         <span className="w-2 h-2 rounded-full bg-[#BC25F9] opacity-0 group-hover:opacity-100" />
                       </span>
-                      <span className="text-sm text-[#D4D4D8] group-hover:text-[#FAFAFA] leading-tight">
-                        {s.name}
+                      <span className="text-sm text-[var(--text-primary)] group-hover:text-[var(--text-primary)] leading-tight">
+                        {s.name.toUpperCase()}
                       </span>
                     </button>
                   ))}
@@ -683,7 +794,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                 <button
                   type="button"
                   onClick={skipStrengthPicker}
-                  className="mt-2 w-full text-center text-xs text-[#71717A] hover:text-[#A1A1AA] py-1 transition-colors"
+                  className="mt-2 w-full text-center text-xs text-[var(--text-secondary)] hover:text-[var(--text-secondary)] py-1 transition-colors"
                 >
                   Skip — enter manually
                 </button>
@@ -706,7 +817,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
           {/* Dosage — Select + custom text input */}
           <div>
-            <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">Dosage</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">Dosage</label>
             <div className="relative">
               <select
                 value={dosageSelectValue}
@@ -723,7 +834,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                 }}
                 className={`${selectClasses} ${getError("dosage") ? selectErrorClasses : ""}`}
               >
-                {DOSAGE_PRESETS.map((opt) => (
+                {activeDosagePresets.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
@@ -731,7 +842,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               </select>
               {/* Custom dropdown chevron */}
               <svg
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1AA] pointer-events-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -748,7 +859,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                   setField("dosage", e.target.value);
                 }}
                 placeholder="Enter custom dosage..."
-                className="mt-2 w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow"
+                className="mt-2 w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-xl text-[17px] text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow"
               />
             )}
             {getError("dosage") && (
@@ -758,7 +869,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
           {/* Quantity — Select dropdown */}
           <div>
-            <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">Quantity</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">Quantity</label>
             <div className="relative">
               <select
                 value={quantitySelectValue}
@@ -774,11 +885,11 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                   }
                 }}
                 style={{ colorScheme: "dark" }}
-                className={`bg-[#151517] rounded-xl px-4 py-3 text-[15px] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/40 transition-shadow appearance-none cursor-pointer w-full ${
+                className={`bg-[var(--bg-secondary)] rounded-xl px-4 py-3 text-[15px] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#BC25F9]/40 transition-shadow appearance-none cursor-pointer w-full ${
                   getError("quantity") ? "ring-2 ring-[#F87171]" : ""
                 }`}
               >
-                {QUANTITY_OPTIONS.map((opt) => (
+                {activeQuantityOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
@@ -786,7 +897,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               </select>
               {/* Custom dropdown chevron */}
               <svg
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1AA] pointer-events-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -803,7 +914,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                   setField("quantity", e.target.value);
                 }}
                 placeholder="Enter custom quantity..."
-                className="mt-2 w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow"
+                className="mt-2 w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-xl text-[17px] text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow"
               />
             )}
             {getError("quantity") && (
@@ -813,8 +924,8 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
           {/* Frequency — Select dropdown */}
           <div>
-            <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">
-              Frequency <span className="text-[#71717A] font-normal">(needed for dose reminders)</span>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+              Frequency <span className="text-[var(--text-secondary)] font-normal">(needed for dose reminders)</span>
             </label>
             <div className="relative">
               <select
@@ -830,7 +941,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               </select>
               {/* Custom dropdown chevron */}
               <svg
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1AA] pointer-events-none"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)] pointer-events-none"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -842,7 +953,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               <p className="mt-1 text-sm text-[#F87171]">{getError("frequency")}</p>
             )}
             {!form.frequency.trim() && (
-              <p className="mt-1 text-xs text-[#71717A]">
+              <p className="mt-1 text-xs text-[var(--text-secondary)]">
                 Set a frequency like "Once daily" to auto-generate dose reminders for your timeline
               </p>
             )}
@@ -851,7 +962,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
           {/* Reminder Times */}
           {reminderTimes.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">
+              <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
                 Reminder Times
               </label>
               <div className="flex flex-wrap gap-2">
@@ -867,17 +978,17 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
                           return next;
                         });
                       }}
-                      className="w-[120px] px-3 py-2 bg-[#151517] rounded-xl text-[15px] text-[#FAFAFA] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow color-scheme-dark border border-[#27272A]"
+                      className="w-[120px] px-3 py-2 bg-[var(--bg-secondary)] rounded-xl text-[15px] text-[var(--text-primary)] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow color-scheme-dark border border-[#BC25F9]/25"
                     />
                     {reminderTimes.length > 1 && (
-                      <span className="text-xs text-[#71717A] min-w-[28px]">
+                      <span className="text-xs text-[var(--text-secondary)] min-w-[28px]">
                         {idx === 0 ? "AM" : idx === reminderTimes.length - 1 ? "PM" : ""}
                       </span>
                     )}
                   </div>
                 ))}
               </div>
-              <p className="mt-1 text-xs text-[#71717A]">
+              <p className="mt-1 text-xs text-[var(--text-secondary)]">
                 Set exact reminder times for this medication. These override the auto-generated defaults.
               </p>
             </div>
@@ -885,7 +996,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
           {/* Prescribing Doctor */}
           <div>
-            <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
               Prescribing Doctor
             </label>
             <input
@@ -893,7 +1004,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               value={form.prescribing_doctor}
               onChange={(e) => setField("prescribing_doctor", e.target.value)}
               placeholder="e.g. Dr. Smith"
-              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow ${
+              className={`w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-xl text-[17px] text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow ${
                 getError("prescribing_doctor") ? "ring-2 ring-[#F87171]" : ""
               }`}
             />
@@ -904,14 +1015,14 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
           {/* Refill Date */}
           <div>
-            <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
               Next Refill Date
             </label>
             <input
               type="date"
               value={form.refill_date}
               onChange={(e) => setField("refill_date", e.target.value)}
-              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow color-scheme-dark ${
+              className={`w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-xl text-[17px] text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow color-scheme-dark ${
                 getError("refill_date") ? "ring-2 ring-[#F87171]" : ""
               }`}
             />
@@ -922,7 +1033,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
           {/* Instructions */}
           <div>
-            <label className="block text-sm font-medium text-[#A1A1AA] mb-1.5">
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
               Instructions
             </label>
             <textarea
@@ -930,7 +1041,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
               onChange={(e) => setField("instructions", e.target.value)}
               placeholder="e.g. Take with food, avoid alcohol..."
               rows={3}
-              className={`w-full px-4 py-3 bg-[#151517] rounded-xl text-[17px] text-[#FAFAFA] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow resize-none ${
+              className={`w-full px-4 py-3 bg-[var(--bg-secondary)] rounded-xl text-[17px] text-[var(--text-primary)] placeholder-[#71717A] outline-none focus:ring-2 focus:ring-[#BC25F9] transition-shadow resize-none ${
                 getError("instructions") ? "ring-2 ring-[#F87171]" : ""
               }`}
             />
@@ -953,14 +1064,14 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
             <div className="pt-1 pb-2">
               {showDeleteConfirm ? (
                 <div className="bg-[#F87171]/5 rounded-2xl p-4 space-y-3 border border-[#F87171]/20">
-                  <p className="text-sm text-[#A1A1AA] text-center">
+                  <p className="text-sm text-[var(--text-secondary)] text-center">
                     Are you sure you want to delete this medication? This cannot be undone.
                   </p>
                   <div className="flex gap-3">
                     <button
                       type="button"
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 bg-[#151517] text-[#A1A1AA] font-medium py-2.5 rounded-xl border border-[#27272A] hover:bg-[#27272A] transition-colors"
+                      className="flex-1 bg-[var(--bg-secondary)] text-[var(--text-secondary)] font-medium py-2.5 rounded-xl border border-[#BC25F9]/25 hover:bg-[var(--bg-tertiary)] transition-colors"
                     >
                       Cancel
                     </button>
@@ -1007,7 +1118,7 @@ export default function AddEditMedicationModal({ medication, onClose, onSaved, i
 
         /* Dark theme select option styling */
         select option {
-          background: #151517;
+          background: var(--bg-tertiary);
           color: #FAFAFA;
         }
       `}</style>

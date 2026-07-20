@@ -1,7 +1,8 @@
+import { formatTime12h } from "../utils";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Medication, Dose, AdherenceStats, Appointment } from "../types";
-import { fetchMedications, fetchTodayDoses, fetchAdherenceStats, fetchUpcomingAppointments, confirmDose, updateDose } from "../api";
+import { fetchMedications, fetchTodayDoses, fetchAdherenceStats, fetchUpcomingAppointments, confirmDose, updateDose, markMidnightMissed } from "../api";
 import { useAuth } from "../AuthContext";
 import { useTheme } from "../ThemeContext";
 import usePremium from "../hooks/usePremium";
@@ -163,7 +164,10 @@ export default function HomePage() {
       midnight.setHours(24, 0, 0, 0);
       const msUntilMidnight = midnight.getTime() - now.getTime();
 
-      return setTimeout(() => {
+      return setTimeout(async () => {
+        // Mark yesterday's pending doses as missed at midnight
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        await markMidnightMissed(yesterday);
         loadData();
         // After midnight, reschedule for the next midnight
         const nextTimeout = scheduleMidnightRefresh();
@@ -227,14 +231,15 @@ export default function HomePage() {
 
   return (
     <div className="pb-24 min-h-screen">
-      {/* Greeting */}
-      <div className="relative bg-[var(--bg-primary)] pt-14 pb-6 px-5">
-        <div className="absolute right-5 top-3">
+      {/* App wordmark top bar */}
+      <div className="flex items-center justify-center pt-0 pb-1 px-5 relative">
+        <img src={theme === "dark" ? "/appheader.png" : "/101.png"} alt="MedTrack AI" className="h-9 object-contain" />
+        <div className="absolute right-5 top-0">
           <UserAvatar />
         </div>
-        <div className="flex justify-center mb-4">
-          <img src={theme === "light" ? "/luna-header-light.png" : "/luna-header.png"} alt="Luna" className="h-28 object-contain" />
-        </div>
+      </div>
+      {/* Greeting */}
+      <div className="relative bg-[var(--bg-primary)] pb-6 px-5">
         <div className="flex items-center gap-2 mb-1">
           {getTimeIcon()}
           <span className="text-[17px] font-medium text-[var(--text-secondary)]">{getGreeting()},</span>
@@ -248,12 +253,12 @@ export default function HomePage() {
       {loading && (
         <div className="space-y-4">
           <div className="bg-[var(--bg-secondary)] rounded-3xl p-6 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
-            <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
+            <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24 mb-4" />
             <div className="flex items-center gap-6">
-              <div className="w-[100px] h-[100px] bg-[#27272A] rounded-full" />
+              <div className="w-[100px] h-[100px] bg-[var(--bg-tertiary)] rounded-full" />
               <div className="flex-1 space-y-3">
-                <div className="h-4 bg-[#27272A] rounded w-3/4" />
-                <div className="h-3 bg-[#151517] rounded w-1/2" />
+                <div className="h-4 bg-[var(--bg-tertiary)] rounded w-3/4" />
+                <div className="h-3 bg-[var(--bg-tertiary)] rounded w-1/2" />
               </div>
             </div>
           </div>
@@ -367,7 +372,7 @@ export default function HomePage() {
                     navigate("/tracker");
                   }
                 }}
-                className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#151517]/60 transition-colors duration-200"
+                className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[var(--bg-tertiary)] transition-colors duration-200"
               >
                 <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -379,7 +384,7 @@ export default function HomePage() {
                   <p className="text-[15px] font-medium text-[var(--text-primary)]">Next Dose</p>
                   <p className="text-sm text-[var(--text-secondary)] truncate">
                     {nextDose
-                      ? `${nextDose.medication_name || "Medication"} at ${nextDose.scheduled_time}`
+                      ? `${nextDose.medication_name || "Medication"} at ${formatTime12h(nextDose.scheduled_time)}`
                       : "No upcoming doses"}
                   </p>
                 </div>
@@ -410,7 +415,7 @@ export default function HomePage() {
             {/* Next appointment (premium) */}
             <button
               onClick={() => navigate("/schedule")}
-              className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[#151517]/60 transition-colors duration-200"
+              className="w-full text-left px-6 py-4 flex items-center gap-4 hover:bg-[var(--bg-tertiary)] transition-colors duration-200"
             >
               <div className="w-10 h-10 bg-[#BC25F9]/10 rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">

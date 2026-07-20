@@ -1,6 +1,7 @@
 import { formatTime12h } from "../utils";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../ThemeContext";
 import type { Medication, Dose, Symptom, SymptomPattern, TimelineEntry } from "../types";
 import { getRefillStatus, getRefillLabel } from "../types";
 import { fetchMedications, fetchTodayDoses, updateDose, confirmDose, fetchSymptoms, fetchSymptomPatterns, fetchTimeline } from "../api";
@@ -75,6 +76,7 @@ function groupByDate(entries: any[]): { label: string; date: string; entries: an
 export default function MedsPage() {
   const navigate = useNavigate();
   const { isPremium } = usePremium();
+  const { theme } = useTheme();
   const [meds, setMeds] = useState<Medication[]>([]);
   const [todayDoses, setTodayDoses] = useState<Dose[]>([]);
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
@@ -250,7 +252,7 @@ export default function MedsPage() {
     <div className="pb-24 min-h-screen">
       {/* App wordmark top bar */}
       <div className="flex items-center justify-center pt-0 pb-1 px-5 relative">
-        <img src="/appheader.png" alt="MedTrack AI" className="h-9 object-contain" />
+        <img src={theme === "dark" ? "/appheader.png" : "/101.png"} alt="MedTrack AI" className="h-9 object-contain" />
         <div className="absolute right-5 top-0">
           <UserAvatar />
         </div>
@@ -271,11 +273,11 @@ export default function MedsPage() {
       <div className="px-5">
       {/* View toggle — Premium feature */}
       {isPremium && (
-        <div className="flex bg-[#151517] rounded-xl p-1 mb-5">
+        <div className="flex bg-[var(--bg-tertiary)] rounded-xl p-1 mb-5">
           <button
             onClick={() => setViewMode("meds")}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              viewMode === "meds" ? "bg-[#111113] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
+              viewMode === "meds" ? "bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
           >
             Medications
@@ -283,7 +285,7 @@ export default function MedsPage() {
           <button
             onClick={() => setViewMode("symptoms")}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              viewMode === "symptoms" ? "bg-[#111113] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
+              viewMode === "symptoms" ? "bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
           >
             Symptoms
@@ -291,7 +293,7 @@ export default function MedsPage() {
           <button
             onClick={() => setViewMode("timeline")}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              viewMode === "timeline" ? "bg-[#111113] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
+              viewMode === "timeline" ? "bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm" : "text-[var(--text-secondary)] hover:text-[var(--text-secondary)]"
             }`}
           >
             Timeline
@@ -303,7 +305,7 @@ export default function MedsPage() {
       {viewMode === "symptoms" && isPremium && (
         <div className="space-y-3 pb-20">
           {symptoms.length === 0 ? (
-            <div className="bg-[#111113] rounded-3xl p-8 text-center border border-[#BC25F9]/25 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+            <div className="bg-[var(--bg-secondary)] rounded-3xl p-8 text-center border border-[#BC25F9]/25 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <p className="text-[var(--text-secondary)]">No symptoms logged yet.</p>
               <p className="text-sm text-[var(--text-secondary)] mt-1">Tap the cyan + button to log your first symptom.</p>
             </div>
@@ -314,7 +316,7 @@ export default function MedsPage() {
               return (
                 <div
                   key={s.id}
-                  className="bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[var(--text-secondary)] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
+                  className="bg-[var(--bg-secondary)] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[var(--text-secondary)] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)]"
                 >
                   <div className="flex items-center gap-4">
                     <div
@@ -353,7 +355,7 @@ export default function MedsPage() {
 
           {/* Symptom Patterns */}
           {patterns.length > 0 && (
-            <div className="bg-[#111113] rounded-2xl border border-[#BC25F9]/25 p-6 mt-4 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+            <div className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 p-6 mt-4 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="flex items-center gap-2 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FBBF24" className="w-5 h-5">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
@@ -382,7 +384,7 @@ export default function MedsPage() {
                             {p.count}x
                           </span>
                         </div>
-                        <div className="w-full bg-[#27272A] rounded-full h-2 overflow-hidden">
+                        <div className="w-full bg-[var(--bg-tertiary)] rounded-full h-2 overflow-hidden">
                           <div
                             className="h-2 rounded-full transition-all duration-500"
                             style={{
@@ -419,14 +421,14 @@ export default function MedsPage() {
         {tlLoading && (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#111113] rounded-2xl p-4 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
-                <div className="h-4 bg-[#27272A] rounded w-24 mb-4" />
+              <div key={i} className="bg-[var(--bg-secondary)] rounded-2xl p-4 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+                <div className="h-4 bg-[var(--bg-tertiary)] rounded w-24 mb-4" />
                 <div className="space-y-3">
                   <div className="flex gap-3">
-                    <div className="w-9 h-9 bg-[#27272A] rounded-full" />
+                    <div className="w-9 h-9 bg-[var(--bg-tertiary)] rounded-full" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-[#27272A] rounded w-3/4" />
-                      <div className="h-3 bg-[#151517] rounded w-1/2" />
+                      <div className="h-4 bg-[var(--bg-tertiary)] rounded w-3/4" />
+                      <div className="h-3 bg-[var(--bg-tertiary)] rounded w-1/2" />
                     </div>
                   </div>
                 </div>
@@ -437,7 +439,7 @@ export default function MedsPage() {
 
         {/* Error */}
         {!tlLoading && tlError && (
-          <div className="bg-[#111113] rounded-2xl p-6 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+          <div className="bg-[var(--bg-secondary)] rounded-2xl p-6 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
             <p className="text-[#F87171] text-sm mb-2">{tlError}</p>
             <button
               onClick={loadTimeline}
@@ -450,7 +452,7 @@ export default function MedsPage() {
 
         {/* Empty state */}
         {!tlLoading && !tlError && timelineGroups.length === 0 && (
-          <div className="bg-[#111113] rounded-2xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+          <div className="bg-[var(--bg-secondary)] rounded-2xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
             <div className="w-16 h-16 bg-[#BC25F9]/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -470,7 +472,7 @@ export default function MedsPage() {
         {!tlLoading && !tlError && timelineGroups.length > 0 && (
           <div className="space-y-3 pb-20">
             {timelineGroups.map((group) => (
-              <div key={group.date} className="bg-[#111113] rounded-2xl border border-[#BC25F9]/25 overflow-hidden shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+              <div key={group.date} className="bg-[var(--bg-secondary)] rounded-2xl border border-[#BC25F9]/25 overflow-hidden shadow-[0_0_12px_rgba(188,37,249,0.18)]">
                 {/* Date header */}
                 <div className="px-4 py-3 border-b border-[#BC25F9]/25">
                   <h2 className="text-sm font-semibold text-[var(--text-secondary)]">
@@ -482,7 +484,7 @@ export default function MedsPage() {
                 </div>
 
                 {/* Entries */}
-                <div className="divide-y divide-[#27272A]">
+                <div className="divide-y divide-[var(--bg-tertiary)]">
                   {group.entries.map((entry: any) => {
                     // Dose entry
                     if (entry.type === "dose") {
@@ -505,7 +507,7 @@ export default function MedsPage() {
                               </svg>
                             </div>
                           ) : (
-                            <div className="w-9 h-9 bg-[#27272A] rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-9 h-9 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center flex-shrink-0">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                                 <polyline points="6 6 12 12 6 18" />
                                 <polyline points="14 6 18 12 14 18" />
@@ -611,7 +613,7 @@ export default function MedsPage() {
       <>
       {/* Today's Doses Card */}
       {!loading && todayDoses.length > 0 && (
-        <div className="bg-[#111113] rounded-3xl border border-[#BC25F9]/25 p-5 mb-5 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+        <div className="bg-[var(--bg-secondary)] rounded-3xl border border-[#BC25F9]/25 p-5 mb-5 shadow-[0_0_12px_rgba(188,37,249,0.18)]">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-[17px] font-semibold text-[var(--text-primary)] tracking-tight">Today</h2>
             <span className="text-sm text-[var(--text-secondary)]">
@@ -620,7 +622,7 @@ export default function MedsPage() {
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-[#27272A] rounded-full h-2 mb-4 overflow-hidden">
+          <div className="w-full bg-[var(--bg-tertiary)] rounded-full h-2 mb-4 overflow-hidden">
             <div
               className="h-2 bg-[#34D399] rounded-full transition-all duration-300"
               style={{ width: `${totalToday > 0 ? (takenToday / totalToday) * 100 : 0}%` }}
@@ -636,7 +638,7 @@ export default function MedsPage() {
               const isFlashing = medId ? flashingMeds.has(medId) : false;
 
               return (
-              <div key={medName} className="bg-[#151517]/60 rounded-xl p-3">
+              <div key={medName} className="bg-[var(--bg-tertiary)] rounded-xl p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-7 h-7 bg-[#BC25F9]/10 rounded-lg flex items-center justify-center flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#BC25F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
@@ -697,12 +699,12 @@ export default function MedsPage() {
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-[#111113] rounded-3xl p-5 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+            <div key={i} className="bg-[var(--bg-secondary)] rounded-3xl p-5 border border-[#BC25F9]/25 animate-pulse shadow-[0_0_12px_rgba(188,37,249,0.18)]">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#27272A] rounded-xl" />
+                <div className="w-12 h-12 bg-[var(--bg-tertiary)] rounded-xl" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-[#27272A] rounded w-1/2" />
-                  <div className="h-3 bg-[#151517] rounded w-1/3" />
+                  <div className="h-4 bg-[var(--bg-tertiary)] rounded w-1/2" />
+                  <div className="h-3 bg-[var(--bg-tertiary)] rounded w-1/3" />
                 </div>
               </div>
             </div>
@@ -712,7 +714,7 @@ export default function MedsPage() {
 
       {/* Error state */}
       {!loading && error && (
-        <div className="bg-[#111113] rounded-3xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
+        <div className="bg-[var(--bg-secondary)] rounded-3xl p-8 border border-[#BC25F9]/25 text-center shadow-[0_0_12px_rgba(188,37,249,0.18)]">
           <div className="w-16 h-16 bg-[#F87171]/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
               <circle cx="12" cy="12" r="10" />
@@ -762,7 +764,7 @@ export default function MedsPage() {
               <button
                 key={med.id}
                 onClick={() => navigate(`/medications/${med.id}`)}
-                className={`w-full text-left bg-[#111113] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[var(--text-secondary)] active:scale-[0.99] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] ${
+                className={`w-full text-left bg-[var(--bg-secondary)] rounded-2xl p-5 border border-[#BC25F9]/25 hover:border-[var(--text-secondary)] active:scale-[0.99] transition-all duration-200 shadow-[0_0_12px_rgba(188,37,249,0.18)] ${
                   med.refill_date ? `border-l-2 ${colors.border}` : ""
                 }`}
               >
@@ -947,8 +949,8 @@ function DosePill({
             : effectiveStatus === "missed"
             ? "bg-[#F87171]/10 text-[#F87171]"
             : effectiveStatus === "skipped"
-            ? "bg-[#27272A] text-[var(--text-secondary)] line-through"
-            : "bg-[#151517] text-[var(--text-secondary)] border border-[#BC25F9]/25 hover:border-[#BC25F9] hover:text-[#BC25F9] cursor-pointer"
+            ? "bg-[var(--bg-tertiary)] text-[var(--text-secondary)] line-through"
+            : "bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border border-[#BC25F9]/25 hover:border-[#BC25F9] hover:text-[#BC25F9] cursor-pointer"
         }`}
       >
         {isTaken ? (
